@@ -1,0 +1,24 @@
+{
+  "background": {
+      "scripts": ["background.js"]
+  },
+  "browser_action": {
+      "default_title": "Containers settings export and import"
+  },
+  "description": "Copy all container settings to/from a file",
+  "homepage_url": "https://github.com/BillDietrich/ContainersExportImport",
+  "manifest_version": 2,
+  "name": "Containers settings export import",
+  "options_ui": {
+      "page": "options.html",
+      "browser_style": true
+  },
+  "permissions": ["storage", "contextualIdentities", "cookies"],
+  "version": "1.0",
+  "applications": {
+      "gecko": {
+          "id": "containersexportimport@billdietrich.me",
+          "strict_min_version": "57.0a1"
+      }
+  }
+}

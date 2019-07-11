@@ -1,0 +1,35 @@
+{
+  "name": "containersexportimport",
+  "title": "Containers settings export import",
+  "version": "1.0.0",
+  "description": "Copy all container settings to/from a file",
+    "author": {
+	    "name": "Bill Dietrich"
+    },
+	"publisher": "BillDietrich",
+  "devDependencies": {
+    "eslint": "^4.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BillDietrich/ContainersExportImport.git"
+  },
+  "scripts": {
+    "test": "eslint .",
+    "lint": "eslint ."
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BillDietrich/ContainersExportImport/issues"
+  },
+  "keywords": [
+    "container",
+    "export",
+    "import",
+    "firefox"
+  ],
+  "dependencies": {
+    "babel-eslint": "^7.2.3"
+  }
+}
+
