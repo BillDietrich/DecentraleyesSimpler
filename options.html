@@ -6,12 +6,20 @@
   </head>
 
 <body>
-  <p>storage.managed colour: <b id="managed-colour">no value found</b></p>
-  <form>
-      <label>Favourite colour</label>
-      <input type="text" id="colour" >
-      <button type="submit">Save</button>
+<div style="display:table">
+  <form id="form2">
+      <label>Import from file</label>
+      <input type="file" id="importfile" accept=".json" >
+      <button type="submit" >Open</button>
   </form>
+</div>
+  <br /><br />
+<div style="display:table">
+  <form id="form3">
+      <label>Export to file</label>
+      <button type="submit" >Save As ...</button>
+  </form>
+</div>
   <script src="options.js"></script>
 </body>
 
