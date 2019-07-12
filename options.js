@@ -19,18 +19,7 @@ function onContextError(e) {
 //-------------------------------------------------------------------------------------
 
 
-var gArrObjectsToSave = null;    // array of objects to save
-
-
-function logCookies(cookies) {
-    console.log(`logCookies: Retrieved ${cookies.length} cookies`);
-  for (let cookie of cookies) {
-    console.log(`Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
-    gArrObjectsToSave.push(cookie);
-  }
-}
-
-
+var gArrSettingObjects = null;    // array of objects to save/import
 
 
 function readContainersFromBrowser(e) {
@@ -39,17 +28,19 @@ function readContainersFromBrowser(e) {
       console.log('browser.contextualIdentities not available. Check that the privacy.userContext.enabled pref is set to true, and reload the add-on.');
     } else {
 
-        gArrObjectsToSave = new Array();
+        gArrSettingObjects = new Array();
+        var ArrPromises = new Array();
         
         /*
-        gArrObjectsToSave.push(new String("test here"));
-        gArrObjectsToSave.push(new Array("abc", "def"));
-        gArrObjectsToSave.push(new String("test2 here"));
+        gArrSettingObjects.push(new String("test here"));
+        gArrSettingObjects.push(new Array("abc", "def"));
+        gArrSettingObjects.push(new String("test2 here"));
         */
 
-      var promiseGetContexts = browser.contextualIdentities.query({})
-        .then((identities) => {
-            console.log(`Retrieved ${identities.length} identities`);
+      var promiseGetContexts = browser.contextualIdentities.query({});
+
+      promiseGetContexts.then((identities) => {
+          console.log(`Retrieved ${identities.length} identities`);
           if (!identities.length) {
             return;
           }
@@ -57,46 +48,64 @@ function readContainersFromBrowser(e) {
          for (let identity of identities) {
            console.log(`readContainersFromBrowser: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
            
-           gArrObjectsToSave.push(identity);
+           gArrSettingObjects.push(identity);
 
            //var promiseContext = browser.contextualIdentities.get(identity.cookieStoreId).then(onGotContext, onContextError);
            
             var promiseGettingAllCookies = browser.cookies.getAll({
-              storeId: identity.cookieStoreId
+              storeId: identity.cookieStoreId,
+              firstPartyDomain: null
+            }).then((cookies) => {
+              // random is there to make add-on debugger show all msgs
+              console.log(`readContainersFromBrowser: Retrieved ${cookies.length} cookies ${Math.random()}`);
+              for (let cookie of cookies) {
+                console.log(`readContainersFromBrowser: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
+                gArrSettingObjects.push(cookie);
+              }
             });
-            promiseGettingAllCookies.then(logCookies);
+           ArrPromises.push(promiseGettingAllCookies);
+           console.log(`readContainersFromBrowser: ArrPromises.length ${ArrPromises.length}`);
            
          }
          
-         saveToFile();
+         var allPromises = Promise.all(ArrPromises);
+
+         allPromises.then(() => {
+            console.log(`readContainersFromBrowser: Finished all cookies`);
+            //ArrPromises = null;
+            var promiseSave = saveToFile();
+              promiseSave.then(() => {
+                    console.log(`readContainersFromBrowser: Save done`);
+                  });
+          });
       });
     }
 
-  // don't submit the form
-  e.preventDefault();
+    // don't submit the form
+    e.preventDefault();
 
     console.log('containersexportimport.readContainersFromBrowser: return');
- }
+}
 
 
-    var gObjectURL = null;
+var gObjectURL = null;
 
-    var gnDownloadID = 0;
+var gnDownloadID = 0;
 
 
  
- function onStartedDownload(id) {
+function onStartedDownload(id) {
   console.log(`containersexportimport.onStartedDownload: called, id == ${id}`);
   gnDownloadID = id;
 }
 
 function onFailedDownload(error) {
   console.log(`containersexportimport.onFailedDownload: called, ${error}`);
-    URL.revokeObjectURL(gObjectURL);
-    gObjectURL = null;
-    gArrObjectsToSave = null;
-    gnDownloadID = 0;
-    browser.downloads.onChanged.removeListener(onChangedDownload);
+  URL.revokeObjectURL(gObjectURL);
+  gObjectURL = null;
+  gArrSettingObjects = null;
+  gnDownloadID = 0;
+  browser.downloads.onChanged.removeListener(onChangedDownload);
 }
 
 function onChangedDownload(downloadDelta) {
@@ -106,47 +115,82 @@ function onChangedDownload(downloadDelta) {
     console.log(`containersexportimport.onChangedDownload: Download ${downloadDelta.id} has completed.`);
     URL.revokeObjectURL(gObjectURL);
     gObjectURL = null;
-    gArrObjectsToSave = null;
+    gArrSettingObjects = null;
     gnDownloadID = 0;
     browser.downloads.onChanged.removeListener(onChangedDownload);
   }
 }
 
 function saveToFile() {
-    console.log(`containersexportimport.saveToFile: called, gArrObjectsToSave == ${gArrObjectsToSave}`);
-        
-    //var objectToSave = new Blob(gArrObjectsToSave);
-    var objectToSave = new Blob(new String(JSON.stringify(gArrObjectsToSave, null, 2)));
-    //var objectToSave = new Blob(gArrObjectsToSave.toJSON());
+  console.log(`containersexportimport.saveToFile: called, gArrSettingObjects == ${gArrSettingObjects}`);
+      
+  var objectToSave = new Blob(new String(JSON.stringify(gArrSettingObjects, null, 2)));
 
-    gObjectURL = URL.createObjectURL(objectToSave);
-    
-    var promiseDownloading = browser.downloads.download({
-        //url: 'https://billdietrich.me/index.html',
-      url: gObjectURL,
-      //body : 'this is a test',
-      saveAs: true,
-      conflictAction : 'overwrite',
-      filename: 'containers.json'
-    });
-    
-    browser.downloads.onChanged.addListener(onChangedDownload);
-    promiseDownloading.then(onStartedDownload, onFailedDownload);
+  gObjectURL = URL.createObjectURL(objectToSave);
+  
+  var promiseDownloading = browser.downloads.download({
+    url: gObjectURL,
+    saveAs: true,
+    conflictAction : 'overwrite',
+    filename: 'containers.json'
+  });
+  
+  browser.downloads.onChanged.addListener(onChangedDownload);
+  promiseDownloading.then(onStartedDownload, onFailedDownload);
+
+  return promiseDownloading;
 }
 
 //-------------------------------------------------------------------------------------
 
+var gFileReader = null;
+var gFile = null;
+
+
+function writeContainers() {
+    console.log('containersexportimport.writeContainers: called');
+}
+
 function readFromFile(e) {
-    console.log('containersexportimport.readFromFile: called');
-    
-    // JSON.parse(sString);
+  console.log('containersexportimport.readFromFile: called');
+
+  if (gFile) {
+
+    gFileReader = new FileReader();
+    gFileReader.onload = function(evt) {
+      console.log(`containersexportimport.readFromFile: result ${evt.target.result}`);
+ 
+      gArrSettingObjects = JSON.parse(evt.target.result);
+
+      writeContainers();
+    };
+
+    gFileReader.readAsText(gFile);
+    console.log('containersexportimport.readFromFile: did readAsText');
+  }
     
   // don't submit the form
   e.preventDefault();
+  console.log(`containersexportimport.readFromFile: return`);
 }
+
+function handleFileSelect(evt){
+  console.log(`containersexportimport.handleFileSelect: evt ${evt}`);
+  console.log(`containersexportimport.handleFileSelect: evt.target.files.length ${evt.target.files.length}`);
+  console.log(`containersexportimport.handleFileSelect: evt.target.files[0].name ${evt.target.files[0].name}`);
+  console.log(`containersexportimport.handleFileSelect: evt.target.files[0].webkitRelativePath ${evt.target.files[0].webkitRelativePath}`);
+
+  gFile = evt.target.files[0];
+
+  console.log(`containersexportimport.handleFileSelect: return`);
+}
+
+
+ 
 
 //-------------------------------------------------------------------------------------
 
+document.querySelector('#importfile').addEventListener('change', handleFileSelect, false);
 document.querySelector("#form2").addEventListener("submit", readFromFile);
 document.querySelector("#form3").addEventListener("submit", readContainersFromBrowser);
 
