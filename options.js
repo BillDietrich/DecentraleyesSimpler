@@ -21,6 +21,9 @@ function onContextError(e) {
 
 var gArrSettingObjects = null;    // array of objects to save/import
 
+var gnContainersDone = 0;
+var gnCookiesDone = 0;
+
 
 function readContainersFromBrowser(e) {
   console.log(``);
@@ -36,6 +39,9 @@ function readContainersFromBrowser(e) {
 
     gArrSettingObjects = new Array();
     var ArrPromises = new Array();
+
+    gnContainersDone = 0;
+    gnCookiesDone = 0;
     
     /*
     gArrSettingObjects.push(new String("test here"));
@@ -57,18 +63,20 @@ function readContainersFromBrowser(e) {
         console.log(`readContainersFromBrowser: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
         
         gArrSettingObjects.push(identity);
+        gnContainersDone++;
 
         //var promiseContext = browser.contextualIdentities.get(identity.cookieStoreId).then(onGotContext, onContextError);
         
         var promiseGettingAllCookies = browser.cookies.getAll({
-          storeId: identity.cookieStoreId,
-          firstPartyDomain: null
+          storeId: identity.cookieStoreId
+          //firstPartyDomain: null
         }).then((cookies) => {
           // random is there to make add-on debugger show all msgs
           console.log(`readContainersFromBrowser: Retrieved ${cookies.length} cookies ${Math.random()}`);
           for (let cookie of cookies) {
             console.log(`readContainersFromBrowser: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
             gArrSettingObjects.push(cookie);
+            gnCookiesDone++;
           }
         });
         ArrPromises.push(promiseGettingAllCookies);
@@ -83,8 +91,8 @@ function readContainersFromBrowser(e) {
         //ArrPromises = null;
         var promiseSave = saveToFile();
           promiseSave.then(() => {
-                alert("Export finished");
-                console.log(`readContainersFromBrowser: Save done`);
+                alert(`Export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+                console.log(`readContainersFromBrowser: Save done; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
               });
       });
 
@@ -216,6 +224,9 @@ function deleteAllContainers() {
 function writeContainers() {
   console.log(`writeContainers: called`);
 
+  gnContainersDone = 0;
+  gnCookiesDone = 0;
+
   console.log(`writeContainers: gArrSettingObjects.length ${gArrSettingObjects.length}`);
   for (let obj of gArrSettingObjects) {
     if ( obj.hasOwnProperty('color') ) {
@@ -226,6 +237,7 @@ function writeContainers() {
       console.log(`writeContainers: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
 
       // TO-DO: create it
+      gnContainersDone++;
     }
     else if ( obj.hasOwnProperty('hostOnly') ) {
       // it's a cookie
@@ -235,6 +247,7 @@ function writeContainers() {
       console.log(`writeContainers: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
 
       // TO-DO: create it
+      gnCookiesDone++;
     }
     else {
       // random is there to make add-on debugger show all msgs
@@ -265,9 +278,9 @@ function readFromFile(e) {
 
       writeContainers();
 
-      alert("Import finished");
+      alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
 
-      console.log(`readFromFile: done`);
+      console.log(`readFromFile: done; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
     };
 
     gFileReader.readAsText(gFile);
