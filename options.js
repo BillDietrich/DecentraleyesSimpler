@@ -23,68 +23,78 @@ var gArrSettingObjects = null;    // array of objects to save/import
 
 
 function readContainersFromBrowser(e) {
-    console.log('containersexportimport.readContainersFromBrowser: called');
-    if (browser.contextualIdentities === undefined) {
-      console.log('browser.contextualIdentities not available. Check that the privacy.userContext.enabled pref is set to true, and reload the add-on.');
-    } else {
+  console.log(``);
+  console.log(`readContainersFromBrowser: called`);
 
-        gArrSettingObjects = new Array();
-        var ArrPromises = new Array();
+  if (browser.contextualIdentities === undefined) {
+
+    let sMsg = "browser.contextualIdentities not available. Check that the privacy.userContext.enabled pref is set to true, and reload the add-on.";
+    console.log(`${sMsg}`);
+    alert(sMsg);
+
+  } else {
+
+    gArrSettingObjects = new Array();
+    var ArrPromises = new Array();
+    
+    /*
+    gArrSettingObjects.push(new String("test here"));
+    gArrSettingObjects.push(new Array("abc", "def"));
+    gArrSettingObjects.push(new String("test2 here"));
+    */
+
+    var promiseGetContexts = browser.contextualIdentities.query({});
+
+    promiseGetContexts.then((identities) => {
+
+      console.log(`Retrieved ${identities.length} identities`);
+      if (!identities.length) {
+        alert("No containers to export");
+        return;
+      }
+
+      for (let identity of identities) {
+        console.log(`readContainersFromBrowser: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
         
-        /*
-        gArrSettingObjects.push(new String("test here"));
-        gArrSettingObjects.push(new Array("abc", "def"));
-        gArrSettingObjects.push(new String("test2 here"));
-        */
+        gArrSettingObjects.push(identity);
 
-      var promiseGetContexts = browser.contextualIdentities.query({});
-
-      promiseGetContexts.then((identities) => {
-          console.log(`Retrieved ${identities.length} identities`);
-          if (!identities.length) {
-            return;
+        //var promiseContext = browser.contextualIdentities.get(identity.cookieStoreId).then(onGotContext, onContextError);
+        
+        var promiseGettingAllCookies = browser.cookies.getAll({
+          storeId: identity.cookieStoreId,
+          firstPartyDomain: null
+        }).then((cookies) => {
+          // random is there to make add-on debugger show all msgs
+          console.log(`readContainersFromBrowser: Retrieved ${cookies.length} cookies ${Math.random()}`);
+          for (let cookie of cookies) {
+            console.log(`readContainersFromBrowser: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
+            gArrSettingObjects.push(cookie);
           }
+        });
+        ArrPromises.push(promiseGettingAllCookies);
+        console.log(`readContainersFromBrowser: ArrPromises.length ${ArrPromises.length}`);
+        
+      }
+      
+      var allPromises = Promise.all(ArrPromises);
 
-         for (let identity of identities) {
-           console.log(`readContainersFromBrowser: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
-           
-           gArrSettingObjects.push(identity);
-
-           //var promiseContext = browser.contextualIdentities.get(identity.cookieStoreId).then(onGotContext, onContextError);
-           
-            var promiseGettingAllCookies = browser.cookies.getAll({
-              storeId: identity.cookieStoreId,
-              firstPartyDomain: null
-            }).then((cookies) => {
-              // random is there to make add-on debugger show all msgs
-              console.log(`readContainersFromBrowser: Retrieved ${cookies.length} cookies ${Math.random()}`);
-              for (let cookie of cookies) {
-                console.log(`readContainersFromBrowser: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
-                gArrSettingObjects.push(cookie);
-              }
-            });
-           ArrPromises.push(promiseGettingAllCookies);
-           console.log(`readContainersFromBrowser: ArrPromises.length ${ArrPromises.length}`);
-           
-         }
-         
-         var allPromises = Promise.all(ArrPromises);
-
-         allPromises.then(() => {
-            console.log(`readContainersFromBrowser: Finished all cookies`);
-            //ArrPromises = null;
-            var promiseSave = saveToFile();
-              promiseSave.then(() => {
-                    console.log(`readContainersFromBrowser: Save done`);
-                  });
-          });
+      allPromises.then(() => {
+        console.log(`readContainersFromBrowser: Finished all cookies`);
+        //ArrPromises = null;
+        var promiseSave = saveToFile();
+          promiseSave.then(() => {
+                alert("Export finished");
+                console.log(`readContainersFromBrowser: Save done`);
+              });
       });
-    }
 
-    // don't submit the form
-    e.preventDefault();
+    });
+  }
 
-    console.log('containersexportimport.readContainersFromBrowser: return');
+  // don't submit the form
+  e.preventDefault();
+
+  console.log(`readContainersFromBrowser: return`);
 }
 
 
@@ -95,12 +105,12 @@ var gnDownloadID = 0;
 
  
 function onStartedDownload(id) {
-  console.log(`containersexportimport.onStartedDownload: called, id == ${id}`);
+  console.log(`onStartedDownload: called, id == ${id}`);
   gnDownloadID = id;
 }
 
 function onFailedDownload(error) {
-  console.log(`containersexportimport.onFailedDownload: called, ${error}`);
+  console.log(`onFailedDownload: called, ${error}`);
   URL.revokeObjectURL(gObjectURL);
   gObjectURL = null;
   gArrSettingObjects = null;
@@ -109,10 +119,10 @@ function onFailedDownload(error) {
 }
 
 function onChangedDownload(downloadDelta) {
-  console.log(`containersexportimport.onChangedDownload: called, id ${downloadDelta.id}, state.current ${downloadDelta.state.current}`);
+  console.log(`onChangedDownload: called, id ${downloadDelta.id}, state.current ${downloadDelta.state.current}`);
 
   if (downloadDelta.state && (downloadDelta.state.current === "complete") && (downloadDelta.id == gnDownloadID)) {
-    console.log(`containersexportimport.onChangedDownload: Download ${downloadDelta.id} has completed.`);
+    console.log(`onChangedDownload: Download ${downloadDelta.id} has completed.`);
     URL.revokeObjectURL(gObjectURL);
     gObjectURL = null;
     gArrSettingObjects = null;
@@ -122,7 +132,7 @@ function onChangedDownload(downloadDelta) {
 }
 
 function saveToFile() {
-  console.log(`containersexportimport.saveToFile: called, gArrSettingObjects == ${gArrSettingObjects}`);
+  console.log(`saveToFile: called, gArrSettingObjects == ${gArrSettingObjects}`);
       
   var objectToSave = new Blob(new String(JSON.stringify(gArrSettingObjects, null, 2)));
 
@@ -145,44 +155,140 @@ function saveToFile() {
 
 var gFileReader = null;
 var gFile = null;
+var gArrCookieStoreIDs = null;
 
+
+function deleteAllContainers() {
+  console.log(`deleteAllContainers: called`);
+
+  var promiseGetContexts = browser.contextualIdentities.query({});
+
+  promiseGetContexts.then((identities) => {
+    console.log(`Retrieved ${identities.length} identities`);
+
+    var ArrPromises = new Array();
+    gArrCookieStoreIDs = new Array();
+
+    for (let identity of identities) {
+      console.log(`deleteAllContainers: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
+      var promiseRemoveContext = browser.contextualIdentities.remove(identity.cookieStoreId);
+      ArrPromises.push(promiseRemoveContext);
+      gArrCookieStoreIDs.push(identity.cookieStoreId);
+    }
+        
+    var allPromises = Promise.all(ArrPromises);
+
+    allPromises.then(() => {
+      console.log(`deleteAllContainers: Finished all containers`);
+
+      ArrPromises = new Array();
+      for (let cookieStoreId of gArrCookieStoreIDs) {
+        var promiseGettingAllCookies = browser.cookies.getAll({
+          storeId: cookieStoreId,
+          firstPartyDomain: null
+        }).then((cookies) => {
+          // random is there to make add-on debugger show all msgs
+          console.log(`deleteAllContainers: Retrieved ${cookies.length} cookies ${Math.random()}`);
+          for (let cookie of cookies) {
+            console.log(`deleteAllContainers: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
+            var promiseRemoveCookie = cookie.remove({
+              name: cookie.name,
+              url: cookie.url
+            });
+            ArrPromises.push(promiseRemoveCookie);
+          }
+        });
+        ArrPromises.push(promiseGettingAllCookies);
+        console.log(`deleteAllContainers: ArrPromises.length ${ArrPromises.length}`);
+      }
+        
+      var allPromises = Promise.all(ArrPromises);
+
+      allPromises.then(() => {
+        console.log(`deleteAllContainers: Finished all cookies`);
+        //ArrPromises = null;
+      });
+
+    });
+  });
+}
 
 function writeContainers() {
-    console.log('containersexportimport.writeContainers: called');
+  console.log(`writeContainers: called`);
+
+  console.log(`writeContainers: gArrSettingObjects.length ${gArrSettingObjects.length}`);
+  for (let obj of gArrSettingObjects) {
+    if ( obj.hasOwnProperty('color') ) {
+      // it's a container (contextual identity)
+      // random is there to make add-on debugger show all msgs
+      console.log(`writeContainers: it's a container ${Math.random()}`);
+      var identity = obj;
+      console.log(`writeContainers: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
+
+      // TO-DO: create it
+    }
+    else if ( obj.hasOwnProperty('hostOnly') ) {
+      // it's a cookie
+      // random is there to make add-on debugger show all msgs
+      console.log(`writeContainers: it's a cookie ${Math.random()}`);
+      var cookie = obj;
+      console.log(`writeContainers: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
+
+      // TO-DO: create it
+    }
+    else {
+      // random is there to make add-on debugger show all msgs
+      console.log(`writeContainers: unknown object type ${Math.random()}`);
+    }
+  }
+
+  console.log(`writeContainers: return`);
 }
 
 function readFromFile(e) {
-  console.log('containersexportimport.readFromFile: called');
+  console.log(``);
+  console.log(`readFromFile: called`);
 
   if (gFile) {
 
+    var bDeleteAllExisting = document.querySelector('#deleteallexisting').checked;
+    console.log(`readFromFile: bDeleteAllExisting ${bDeleteAllExisting}`);
+
     gFileReader = new FileReader();
     gFileReader.onload = function(evt) {
-      console.log(`containersexportimport.readFromFile: result ${evt.target.result}`);
+      console.log(`readFromFile: readAsText result ${evt.target.result}`);
  
       gArrSettingObjects = JSON.parse(evt.target.result);
 
+      if (bDeleteAllExisting)
+        deleteAllContainers();
+
       writeContainers();
+
+      alert("Import finished");
+
+      console.log(`readFromFile: done`);
     };
 
     gFileReader.readAsText(gFile);
-    console.log('containersexportimport.readFromFile: did readAsText');
+    console.log(`readFromFile: did readAsText`);
   }
     
   // don't submit the form
   e.preventDefault();
-  console.log(`containersexportimport.readFromFile: return`);
+  console.log(`readFromFile: return`);
 }
 
 function handleFileSelect(evt){
-  console.log(`containersexportimport.handleFileSelect: evt ${evt}`);
-  console.log(`containersexportimport.handleFileSelect: evt.target.files.length ${evt.target.files.length}`);
-  console.log(`containersexportimport.handleFileSelect: evt.target.files[0].name ${evt.target.files[0].name}`);
-  console.log(`containersexportimport.handleFileSelect: evt.target.files[0].webkitRelativePath ${evt.target.files[0].webkitRelativePath}`);
+  console.log(``);
+  console.log(`handleFileSelect: evt ${evt}`);
+  console.log(`handleFileSelect: evt.target.files.length ${evt.target.files.length}`);
+  console.log(`handleFileSelect: evt.target.files[0].name ${evt.target.files[0].name}`);
+  console.log(`handleFileSelect: evt.target.files[0].webkitRelativePath ${evt.target.files[0].webkitRelativePath}`);
 
   gFile = evt.target.files[0];
 
-  console.log(`containersexportimport.handleFileSelect: return`);
+  console.log(`handleFileSelect: return`);
 }
 
 

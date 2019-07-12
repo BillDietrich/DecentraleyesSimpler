@@ -6,22 +6,30 @@
   </head>
 
 <body>
-<div style="display:table">
+<div style="border: 2px solid black; margin: 2px; padding: 5px">
+  <font size="+1"><b>Import container settings from file:</b></font>
   <form id="form2">
-      <label>Import settings from file</label>
       <input type="file" id="importfile" accept=".json" >
+      <br />
+      <label>
+        <input type="checkbox" id="deleteallexisting">
+        Delete all existing containers and container settings
+      </label>
+      <br />
       <button type="submit" >Import settings</button>
   </form>
+  </div>
 </div>
 &nbsp;
   <br />
   &nbsp;
   <br />
-<div style="display:table">
+<div style="border: 2px solid black; margin: 2px; padding: 5px">
+  <font size="+1"><b>Export container settings to file:</b></font>
   <form id="form3">
-      <label>Export settings to file</label>
       <button type="submit" >Save As ...</button>
   </form>
+  </div>
 </div>
   <script src="options.js"></script>
 </body>
