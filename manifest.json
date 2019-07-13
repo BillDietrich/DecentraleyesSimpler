@@ -10,6 +10,8 @@
   "homepage_url": "https://github.com/BillDietrich/ContainersExportImport",
   "manifest_version": 2,
   "name": "Containers settings export import",
+  "icons": { "30": "icon30.png",
+           "60": "icon60.png" },
   "options_ui": {
       "page": "options.html",
       "browser_style": true
