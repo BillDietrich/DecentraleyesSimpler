@@ -64,7 +64,7 @@ function readCookiesFromBrowser() {
   gnCookiesDone = 0;
   
   for (let identity of gArrIdentities) {
-    console.log(`readCookiesFromBrowser: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
+    console.log(`readCookiesFromBrowser: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
 
     gArrSettingObjects.push(identity);
 
@@ -76,7 +76,7 @@ function readCookiesFromBrowser() {
       // random is there to make add-on debugger show all msgs
       console.log(`readCookiesFromBrowser: Retrieved ${cookies.length} cookies ${Math.random()}`);
       for (let cookie of cookies) {
-        console.log(`readCookiesFromBrowser: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
+        console.log(`readCookiesFromBrowser: Cookie: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}`);
         gArrSettingObjects.push(cookie);
         gnCookiesDone++;
       }
@@ -171,7 +171,7 @@ function myDeleteAllIdentities() {
     gArrCookieStoreIDs = new Array();
 
     for (let identity of identities) {
-      console.log(`myDeleteAllIdentities: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
+      console.log(`myDeleteAllIdentities: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
       var promiseRemoveContext = browser.contextualIdentities.remove(identity.cookieStoreId);
       ArrPromises.push(promiseRemoveContext);
       gArrCookieStoreIDs.push(identity.cookieStoreId);
@@ -219,41 +219,85 @@ function myDeleteCookieStores() {
 
 //-------------------------------------------------------------------------------------
 
+function onIdentityCreated(identity) {
+  console.log(`onIdentityCreated: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
+  gnContainersDone++;
+}
+
+function onIdentityCreationError(e) {
+  console.error(`onIdentityCreationError: ${e} ${Math.random()}`);
+}
+
+function onCookieCreated(cookie) {
+  console.log(`onCookieCreated: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}, storeId ${cookie.storeId} ${Math.random()}`);
+  gnCookiesDone++;
+}
+
+function onCookieCreationError(e) {
+  console.error(`onCookieCreationError: ${e} ${Math.random()}`);
+}
+
 function writeContainersToBrowser() {
   console.log(`writeContainersToBrowser: called`);
+
+  var ArrPromises = new Array();
 
   gnContainersDone = 0;
   gnCookiesDone = 0;
 
   console.log(`writeContainersToBrowser: gArrSettingObjects.length ${gArrSettingObjects.length}`);
   for (let obj of gArrSettingObjects) {
+
     if ( obj.hasOwnProperty('color') ) {
       // it's a container (contextual identity)
       // random is there to make add-on debugger show all msgs
       console.log(`writeContainersToBrowser: it's a container ${Math.random()}`);
       var identity = obj;
-      console.log(`writeContainersToBrowser: identity == cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}, name ${identity.name}`);
+      console.log(`writeContainersToBrowser: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
 
-      // TO-DO: create it
-      gnContainersDone++;
+      var promiseCreateIdentity = browser.contextualIdentities.create({
+            name: identity.name,
+            color: identity.color,
+            icon: identity.icon
+      }).then(onIdentityCreated, onIdentityCreationError);
+      ArrPromises.push(promiseCreateIdentity);
     }
+
     else if ( obj.hasOwnProperty('hostOnly') ) {
       // it's a cookie
       // random is there to make add-on debugger show all msgs
       console.log(`writeContainersToBrowser: it's a cookie ${Math.random()}`);
       var cookie = obj;
-      console.log(`writeContainersToBrowser: Cookie: domain ${cookie.domain}, name ${cookie.name}, value ${cookie.value}`);
+      console.log(`writeContainersToBrowser: Cookie: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}`);
 
-      // TO-DO: create it
-      gnCookiesDone++;
+      if (cookie.domain[0] == '.')
+        cookie.domain = cookie.domain.substr(1);
+
+      var promiseCreateCookie = browser.cookies.set({
+            name: cookie.name,
+            url: "https://" + cookie.domain,
+            value: cookie.value,
+            domain: cookie.domain,
+            path: null,
+        secure: null,
+        httpOnly: null,
+        expirationDate: null,
+        storeId: null
+      }).then(onCookieCreated, onCookieCreationError);
+      ArrPromises.push(promiseCreateCookie);
     }
+
     else {
       // random is there to make add-on debugger show all msgs
       console.log(`writeContainersToBrowser: unknown object type ${Math.random()}`);
     }
+
   }
 
+  var allPromises = Promise.all(ArrPromises);
+
   console.log(`writeContainersToBrowser: return`);
+  return allPromises;
 }
 
 function readFromFile() {
@@ -268,13 +312,13 @@ function readFromFile() {
  
       gArrSettingObjects = JSON.parse(evt.target.result);
 
-      writeContainersToBrowser();
+      writeContainersToBrowser().then(() => {
+        updateInfoMsg();
+        alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
 
-      updateInfoMsg();
+        console.log(`readFromFile: done; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+      });
 
-      alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
-
-      console.log(`readFromFile: done; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
     };
 
     gFileReader.readAsText(gFile);
