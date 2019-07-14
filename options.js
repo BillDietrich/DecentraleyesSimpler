@@ -31,6 +31,9 @@ function checkIdentitiesEnabled() {
   return bIdentitiesEnabled;
 }
 
+
+//-------------------------------------------------------------------------------------
+
 function readIdentitiesFromBrowser() {
   console.log(`readIdentitiesFromBrowser: called`);
 
@@ -76,7 +79,7 @@ function readCookiesFromBrowser() {
       // random is there to make add-on debugger show all msgs
       console.log(`readCookiesFromBrowser: Retrieved ${cookies.length} cookies ${Math.random()}`);
       for (let cookie of cookies) {
-        console.log(`readCookiesFromBrowser: Cookie: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}`);
+        console.log(`readCookiesFromBrowser: Cookie: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}, storeId ${cookie.storeId}`);
         gArrSettingObjects.push(cookie);
         gnCookiesDone++;
       }
@@ -219,14 +222,68 @@ function myDeleteCookieStores() {
 
 //-------------------------------------------------------------------------------------
 
+var gArrIdentityNames = null;
+var gArrOldStoreIds = null;
+var gArrNewStoreIds = null;
+
+
 function onIdentityCreated(identity) {
   console.log(`onIdentityCreated: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
+
+  var i = gArrIdentityNames.indexOf(identity.name);
+  console.log(`onIdentityCreated:  oldStoreId ${gArrOldStoreIds[i]}`);
+  gArrNewStoreIds[i] = identity.cookieStoreId;
+
   gnContainersDone++;
 }
 
 function onIdentityCreationError(e) {
   console.error(`onIdentityCreationError: ${e} ${Math.random()}`);
 }
+
+function writeIdentitiesToBrowser() {
+  console.log(`writeIdentitiesToBrowser: called`);
+
+  gArrIdentityNames = new Array();
+  gArrOldStoreIds = new Array();
+  gArrNewStoreIds = new Array();
+
+  var ArrPromises = new Array();
+
+  gnContainersDone = 0;
+
+  console.log(`writeIdentitiesToBrowser: gArrSettingObjects.length ${gArrSettingObjects.length}`);
+  for (let obj of gArrSettingObjects) {
+
+    if ( obj.hasOwnProperty('color') ) {
+      // it's a container (contextual identity)
+      // random is there to make add-on debugger show all msgs
+      console.log(`writeIdentitiesToBrowser: it's a container ${Math.random()}`);
+      var identity = obj;
+      console.log(`writeIdentitiesToBrowser: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
+
+      gArrIdentityNames.push(identity.name);
+      gArrOldStoreIds.push(identity.cookieStoreId);
+      gArrNewStoreIds.push("");
+
+      var promiseCreateIdentity = browser.contextualIdentities.create({
+            name: identity.name,
+            color: identity.color,
+            icon: identity.icon
+      }).then(onIdentityCreated, onIdentityCreationError);
+      ArrPromises.push(promiseCreateIdentity);
+    }
+
+  }
+
+  var allPromises = Promise.all(ArrPromises);
+
+  console.log(`writeIdentitiesToBrowser: return`);
+  return allPromises;
+}
+
+
+//-------------------------------------------------------------------------------------
 
 function onCookieCreated(cookie) {
   console.log(`onCookieCreated: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}, storeId ${cookie.storeId} ${Math.random()}`);
@@ -237,41 +294,28 @@ function onCookieCreationError(e) {
   console.error(`onCookieCreationError: ${e} ${Math.random()}`);
 }
 
-function writeContainersToBrowser() {
-  console.log(`writeContainersToBrowser: called`);
+function writeCookiesToBrowser() {
+  console.log(`writeCookiesToBrowser: called`);
 
   var ArrPromises = new Array();
 
-  gnContainersDone = 0;
   gnCookiesDone = 0;
 
-  console.log(`writeContainersToBrowser: gArrSettingObjects.length ${gArrSettingObjects.length}`);
+  console.log(`writeCookiesToBrowser: gArrSettingObjects.length ${gArrSettingObjects.length}`);
   for (let obj of gArrSettingObjects) {
 
-    if ( obj.hasOwnProperty('color') ) {
-      // it's a container (contextual identity)
-      // random is there to make add-on debugger show all msgs
-      console.log(`writeContainersToBrowser: it's a container ${Math.random()}`);
-      var identity = obj;
-      console.log(`writeContainersToBrowser: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
-
-      var promiseCreateIdentity = browser.contextualIdentities.create({
-            name: identity.name,
-            color: identity.color,
-            icon: identity.icon
-      }).then(onIdentityCreated, onIdentityCreationError);
-      ArrPromises.push(promiseCreateIdentity);
-    }
-
-    else if ( obj.hasOwnProperty('hostOnly') ) {
+    if ( obj.hasOwnProperty('hostOnly') ) {
       // it's a cookie
       // random is there to make add-on debugger show all msgs
-      console.log(`writeContainersToBrowser: it's a cookie ${Math.random()}`);
+      console.log(`writeCookiesToBrowser: it's a cookie ${Math.random()}`);
       var cookie = obj;
-      console.log(`writeContainersToBrowser: Cookie: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}`);
+      console.log(`writeCookiesToBrowser: Cookie: name ${cookie.name}, domain ${cookie.domain}, value ${cookie.value}, storeId ${cookie.storeId}`);
 
       if (cookie.domain[0] == '.')
         cookie.domain = cookie.domain.substr(1);
+
+      var i = gArrOldStoreIds.indexOf(cookie.storeId);
+      console.log(`onIdentityCreated:  newStoreId ${gArrNewStoreIds[i]}`);
 
       var promiseCreateCookie = browser.cookies.set({
             name: cookie.name,
@@ -279,26 +323,25 @@ function writeContainersToBrowser() {
             value: cookie.value,
             domain: cookie.domain,
             path: null,
-        secure: null,
-        httpOnly: null,
-        expirationDate: null,
-        storeId: null
+            secure: null,
+            httpOnly: null,
+            expirationDate: null,
+            storeId: gArrNewStoreIds[i]
       }).then(onCookieCreated, onCookieCreationError);
-      ArrPromises.push(promiseCreateCookie);
-    }
 
-    else {
-      // random is there to make add-on debugger show all msgs
-      console.log(`writeContainersToBrowser: unknown object type ${Math.random()}`);
+      ArrPromises.push(promiseCreateCookie);
     }
 
   }
 
   var allPromises = Promise.all(ArrPromises);
 
-  console.log(`writeContainersToBrowser: return`);
+  console.log(`writeCookiesToBrowser: return`);
   return allPromises;
 }
+
+
+//-------------------------------------------------------------------------------------
 
 function readFromFile() {
   console.log(``);
@@ -312,11 +355,13 @@ function readFromFile() {
  
       gArrSettingObjects = JSON.parse(evt.target.result);
 
-      writeContainersToBrowser().then(() => {
-        updateInfoMsg();
-        alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+      writeIdentitiesToBrowser().then(() => {
+        writeCookiesToBrowser().then(() => {
+          updateInfoMsg();
+          alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
 
-        console.log(`readFromFile: done; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+          console.log(`readFromFile: done; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+        });
       });
 
     };
@@ -330,11 +375,11 @@ function readFromFile() {
 
 
 //-------------------------------------------------------------------------------------
-// things related to the HTML page
+// Things related to the HTML page
 
 function updateInfoMsg(){
   console.log(`updateInfoMsg: called`);
-  document.querySelector('#infodiv').innerHTML = `The browser has ${gnContainersDone} containers with ${gnCookiesDone} cookies in them.`;
+  document.querySelector('#infodiv').innerHTML = `The browser has ${gnContainersDone} containers, with a total of ${gnCookiesDone} cookies in them.`;
   console.log(`updateInfoMsg: return`);
 }
 
