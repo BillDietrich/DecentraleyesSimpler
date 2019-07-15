@@ -22,7 +22,7 @@ function checkIdentitiesEnabled() {
 
     bIdentitiesEnabled = false;
     let sMsg = "browser.contextualIdentities not available. Check that the privacy.userContext.enabled pref is set to true, and reload the add-on.";
-    console.log(`${sMsg}`);
+    console.log(`checkIdentitiesEnabled: ${sMsg}`);
     alert(sMsg);
 
   }
@@ -53,7 +53,9 @@ function readIdentitiesFromBrowser() {
     gnContainersDone = gArrIdentities.length;
     console.log(`readIdentitiesFromBrowser: gnContainersDone ${gnContainersDone}`);
 
-  });
+  }).catch(error => {
+    console.error(`readIdentitiesFromBrowser: error ${error}`);
+	});
 
   console.log(`readIdentitiesFromBrowser: return, promiseGetContexts ${promiseGetContexts}`);
   return promiseGetContexts;
@@ -84,7 +86,9 @@ function readCookiesFromBrowser() {
         gnCookiesDone++;
       }
 
-    });
+    }).catch(error => {
+    console.error(`readCookiesFromBrowser: error ${error}`);
+	  });
 
     ArrPromises.push(promiseGettingAllCookies);
     console.log(`readCookiesFromBrowser: ArrPromises.length ${ArrPromises.length}`);
@@ -131,6 +135,7 @@ function onChangedDownload(downloadDelta) {
     gArrSettingObjects = null;
     gnDownloadID = 0;
     browser.downloads.onChanged.removeListener(onChangedDownload);
+    console.log(`onChangedDownload: export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
     alert(`Export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
   }
 }
@@ -150,8 +155,11 @@ function saveToFile() {
   });
   
   browser.downloads.onChanged.addListener(onChangedDownload);
-  promiseDownloading.then(onStartedDownload, onFailedDownload);
+  promiseDownloading.then(onStartedDownload, onFailedDownload).catch(error => {
+    console.error(`saveToFile: error ${error}`);
+	});
 
+  console.log(`saveToFile: return`);
   return promiseDownloading;
 }
 
@@ -182,9 +190,13 @@ function myDeleteAllIdentities() {
         
     var allPromises = Promise.all(ArrPromises);
 
+    console.log(`myDeleteAllIdentities: return1`);
     return allPromises;
-  });
+  }).catch(error => {
+    console.error(`myDeleteAllIdentities: error ${error}`);
+	});
 
+  console.log(`myDeleteAllIdentities: return2`);
   return promiseGetContexts;
 }
 
@@ -208,7 +220,9 @@ function myDeleteCookieStores() {
         });
         ArrPromises.push(promiseRemoveCookie);
       }
-    });
+    }).catch(error => {
+      console.error(`myDeleteCookieStores: error ${error}`);
+	  });
     ArrPromises.push(promiseGettingAllCookies);
     console.log(`myDeleteCookieStores: ArrPromises.length ${ArrPromises.length}`);
   }
@@ -270,7 +284,9 @@ function writeIdentitiesToBrowser() {
             name: identity.name,
             color: identity.color,
             icon: identity.icon
-      }).then(onIdentityCreated, onIdentityCreationError);
+      }).then(onIdentityCreated, onIdentityCreationError).catch(error => {
+        console.error(`writeIdentitiesToBrowser: error ${error}`);
+	    });
       ArrPromises.push(promiseCreateIdentity);
     }
 
@@ -315,7 +331,7 @@ function writeCookiesToBrowser() {
         cookie.domain = cookie.domain.substr(1);
 
       var i = gArrOldStoreIds.indexOf(cookie.storeId);
-      console.log(`onIdentityCreated:  newStoreId ${gArrNewStoreIds[i]}`);
+      console.log(`writeCookiesToBrowser:  newStoreId ${gArrNewStoreIds[i]}`);
 
       var promiseCreateCookie = browser.cookies.set({
             name: cookie.name,
@@ -327,7 +343,9 @@ function writeCookiesToBrowser() {
             httpOnly: null,
             expirationDate: null,
             storeId: gArrNewStoreIds[i]
-      }).then(onCookieCreated, onCookieCreationError);
+      }).then(onCookieCreated, onCookieCreationError).catch(error => {
+        console.error(`writeCookiesToBrowser: error ${error}`);
+	    });
 
       ArrPromises.push(promiseCreateCookie);
     }
