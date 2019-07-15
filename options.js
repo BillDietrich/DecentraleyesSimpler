@@ -23,7 +23,8 @@ function checkIdentitiesEnabled() {
     bIdentitiesEnabled = false;
     let sMsg = "browser.contextualIdentities not available. Check that the privacy.userContext.enabled pref is set to true, and reload the add-on.";
     console.log(`checkIdentitiesEnabled: ${sMsg}`);
-    alert(sMsg);
+    //alert(sMsg);
+    giveNotification("Browser.contextualIdentities not available", "Check that the privacy.userContext.enabled pref is set to true, and reload the add-on.");
 
   }
 
@@ -136,7 +137,8 @@ function onChangedDownload(downloadDelta) {
     gnDownloadID = 0;
     browser.downloads.onChanged.removeListener(onChangedDownload);
     console.log(`onChangedDownload: export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
-    alert(`Export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+    //alert(`Export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+    giveNotification("Export finished", `Exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
   }
 }
 
@@ -376,7 +378,8 @@ function readFromFile() {
       writeIdentitiesToBrowser().then(() => {
         writeCookiesToBrowser().then(() => {
           updateInfoMsg();
-          alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+          //alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+          giveNotification("Import finished", `Imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
 
           console.log(`readFromFile: done; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
         });
@@ -389,6 +392,22 @@ function readFromFile() {
   }
     
   console.log(`readFromFile: return`);
+}
+
+
+
+//-------------------------------------------------------------------------------------
+
+
+function giveNotification(sTitle, sMessage){
+  console.log(`giveNotification: called, sTitle ${sTitle}, sMessage ${sMessage}`);
+  browser.notifications.create({
+    "type": "basic",
+    "iconUrl": browser.runtime.getURL("icon60.png"),
+    "title": sTitle,
+    "message": sMessage
+  });
+  console.log(`giveNotification: giveNotification`);
 }
 
 
@@ -417,6 +436,9 @@ function updateInfo(evt){
   console.log(``);
   console.log(`updateInfo: evt ${evt}`);
 
+  // defeat popup-blocker that makes alert() fail
+  //delete window.alert;
+
   var bIdentitiesEnabled = checkIdentitiesEnabled();
 
   if (bIdentitiesEnabled) {
@@ -444,7 +466,8 @@ function doExport(evt){
 
       if (gnContainersDone == 0) {
 
-        alert("No containers to export");
+        //alert("No containers to export");
+        giveNotification("No containers to export", ``);
 
       } else {
 

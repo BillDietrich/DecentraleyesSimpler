@@ -1,23 +1,23 @@
 
 {
-  "background": {
-      "scripts": ["background.js"]
-  },
+  "name": "Containers settings export import",
   "browser_action": {
       "default_title": "Containers settings export and import"
   },
-  "description": "Copy all Firefox container settings to/from a file",
+  "description": "Copy all Firefox container settings to/from a file.",
   "homepage_url": "https://github.com/BillDietrich/ContainersExportImport",
   "manifest_version": 2,
-  "name": "Containers settings export import",
   "icons": { "30": "icon30.png",
            "60": "icon60.png" },
+  "background": {
+      "scripts": ["background.js"]
+  },
   "options_ui": {
       "page": "options.html",
       "browser_style": true
   },
-  "permissions": ["storage", "contextualIdentities", "cookies", "downloads", "<all_urls>"],
-  "version": "1.0",
+  "permissions": ["contextualIdentities", "cookies", "downloads", "notifications", "storage", "<all_urls>"],
+  "version": "1.1",
   "applications": {
       "gecko": {
           "id": "containersexportimport@billdietrich.me",

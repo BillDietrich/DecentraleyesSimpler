@@ -2,8 +2,8 @@
 {
   "name": "containersexportimport",
   "title": "Containers settings export import",
-  "version": "1.0.0",
-  "description": "Copy all container settings to/from a file",
+  "version": "1.1.0",
+  "description": "Copy all container settings to/from a file.",
     "author": {
 	    "name": "Bill Dietrich"
     },
