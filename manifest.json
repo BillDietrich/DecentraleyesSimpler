@@ -16,7 +16,7 @@
       "page": "options.html",
       "browser_style": true
   },
-  "permissions": ["contextualIdentities", "cookies", "downloads", "notifications", "storage", "<all_urls>"],
+  "permissions": ["contextualIdentities", "cookies", "downloads", "management", "notifications", "storage", "<all_urls>"],
   "version": "1.1",
   "applications": {
       "gecko": {

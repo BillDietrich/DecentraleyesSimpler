@@ -10,6 +10,17 @@ var gArrCookies = null;
 var gnContainersDone = 0;
 var gnCookiesDone = 0;
 
+var gArrFoundExtensionNames = null;
+var gArrFoundExtensionIds = null;
+
+const gArrKnownContainerExtensionNames = [
+              "Firefox Multi-Account Containers",
+              "Facebook Container",
+              "Google Container",
+              "Reddit Container",
+              "Amazon Container"
+              ];
+
 
 //-------------------------------------------------------------------------------------
 
@@ -35,6 +46,39 @@ function checkIdentitiesEnabled() {
 
 //-------------------------------------------------------------------------------------
 
+function readExtensionsFromBrowser() {
+  console.log(`readIdentitiesFromBrowser: called`);
+  
+  var promiseGetExtensions = browser.management.getAll();
+
+  promiseGetExtensions.then((extensions) => {
+
+    console.log(`readExtensionsFromBrowser: retrieved ${extensions.length} extensions`);
+    gArrFoundExtensionNames = [];
+    gArrFoundExtensionIds = [];
+    for (let extension of extensions) {
+      console.log(`readExtensionsFromBrowser: extension.name ${extension.name}, extension.type ${extension.type}, extension.id ${extension.id}`);
+      if (extension.type == "extension") {
+        if (gArrKnownContainerExtensionNames.indexOf(extension.name) >= 0) {
+          console.log(`readExtensionsFromBrowser: it's a container extension`);
+          gArrFoundExtensionNames.push(new String(extension.name));
+          gArrFoundExtensionIds.push(new String(extension.id));
+        }
+      }
+    }
+    console.log(`readExtensionsFromBrowser: done, gArrFoundExtensionNames.length ${gArrFoundExtensionNames.length}`);
+
+  }).catch(error => {
+    console.error(`readExtensionsFromBrowser: error ${error}`);
+	});
+
+  console.log(`readExtensionsFromBrowser: return, promiseGetExtensions ${promiseGetExtensions}`);
+  return promiseGetExtensions;
+}
+
+
+//-------------------------------------------------------------------------------------
+
 function readIdentitiesFromBrowser() {
   console.log(`readIdentitiesFromBrowser: called`);
 
@@ -52,7 +96,7 @@ function readIdentitiesFromBrowser() {
       gArrIdentities.push(identity);
     console.log(`readIdentitiesFromBrowser: gArrIdentities.length ${gArrIdentities.length}`);
     gnContainersDone = gArrIdentities.length;
-    console.log(`readIdentitiesFromBrowser: gnContainersDone ${gnContainersDone}`);
+    console.log(`readIdentitiesFromBrowser: done, gnContainersDone ${gnContainersDone}`);
 
   }).catch(error => {
     console.error(`readIdentitiesFromBrowser: error ${error}`);
@@ -86,6 +130,7 @@ function readCookiesFromBrowser() {
         gArrSettingObjects.push(cookie);
         gnCookiesDone++;
       }
+      console.log(`readCookiesFromBrowser: done`);
 
     }).catch(error => {
     console.error(`readCookiesFromBrowser: error ${error}`);
@@ -416,7 +461,26 @@ function giveNotification(sTitle, sMessage){
 
 function updateInfoMsg(){
   console.log(`updateInfoMsg: called`);
-  document.querySelector('#infodiv').innerHTML = `The browser has ${gnContainersDone} containers, with a total of ${gnCookiesDone} cookies in them.`;
+
+  var sMsg = `The browser has ${gnContainersDone} containers, with a total of ${gnCookiesDone} cookies in them.`;
+  sMsg += "<br /><br />";
+  sMsg += `There are ${gArrFoundExtensionNames.length} container-handling extensions installed`;
+
+  console.log(`updateInfoMsg: gArrFoundExtensionNames.length ${gArrFoundExtensionNames.length}`);
+  if (gArrFoundExtensionNames.length == 0)
+    sMsg += ".";
+  else {
+    sMsg += ":";
+    for (i=0 ; i<gArrFoundExtensionNames.length ; i++) {
+      console.log(`updateInfoMsg: gArrFoundExtensionNames[i] ${gArrFoundExtensionNames[i]}`);
+      sMsg += "&nbsp;&nbsp;";
+      sMsg += gArrFoundExtensionNames[i];
+      if (i < gArrFoundExtensionNames.length-1)
+        sMsg += ",";
+    }
+  }
+
+  document.querySelector('#infodiv').innerHTML = sMsg;
   console.log(`updateInfoMsg: return`);
 }
 
@@ -436,20 +500,20 @@ function updateInfo(evt){
   console.log(``);
   console.log(`updateInfo: evt ${evt}`);
 
-  // defeat popup-blocker that makes alert() fail
-  //delete window.alert;
+  readExtensionsFromBrowser().then(() => {
 
-  var bIdentitiesEnabled = checkIdentitiesEnabled();
+    var bIdentitiesEnabled = checkIdentitiesEnabled();
 
-  if (bIdentitiesEnabled) {
+    if (bIdentitiesEnabled) {
 
-    readIdentitiesFromBrowser().then(() => {
-      readCookiesFromBrowser().then(() => {
-        updateInfoMsg();
+      readIdentitiesFromBrowser().then(() => {
+        readCookiesFromBrowser().then(() => {
+          updateInfoMsg();
+        });
       });
-    });
-  
-  }
+    
+    }
+  });
 
   console.log(`updateInfo: return`);
 }
