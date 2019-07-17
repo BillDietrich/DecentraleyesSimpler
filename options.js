@@ -92,8 +92,10 @@ function readIdentitiesFromBrowser() {
 
     console.log(`readIdentitiesFromBrowser: retrieved ${identities.length} identities`);
     gArrIdentities = new Array();
-    for (let identity of identities)
+    for (let identity of identities) {
       gArrIdentities.push(identity);
+      gArrSettingObjects.push(identity);  // had to add here when disabled cookie-saving
+    }
     console.log(`readIdentitiesFromBrowser: gArrIdentities.length ${gArrIdentities.length}`);
     gnContainersDone = gArrIdentities.length;
     console.log(`readIdentitiesFromBrowser: done, gnContainersDone ${gnContainersDone}`);
@@ -116,7 +118,7 @@ function readCookiesFromBrowser() {
   for (let identity of gArrIdentities) {
     console.log(`readCookiesFromBrowser: identity == name ${identity.name}, cookieStoreId ${identity.cookieStoreId}, color ${identity.color}, colorCode ${identity.colorCode}, icon ${identity.icon}, iconUrl ${identity.iconUrl}`);
 
-    gArrSettingObjects.push(identity);
+    //gArrSettingObjects.push(identity);
 
     var promiseGettingAllCookies = browser.cookies.getAll({
       storeId: identity.cookieStoreId
@@ -183,7 +185,8 @@ function onChangedDownload(downloadDelta) {
     browser.downloads.onChanged.removeListener(onChangedDownload);
     console.log(`onChangedDownload: export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
     //alert(`Export finished; exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
-    giveNotification("Export finished", `Exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+    //giveNotification("Export finished", `Exported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+    giveNotification("Export finished", `Exported ${gnContainersDone} containers`);
   }
 }
 
@@ -421,13 +424,14 @@ function readFromFile() {
       gArrSettingObjects = JSON.parse(evt.target.result);
 
       writeIdentitiesToBrowser().then(() => {
-        writeCookiesToBrowser().then(() => {
+        //writeCookiesToBrowser().then(() => {
           updateInfoMsg();
           //alert(`Import finished; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
-          giveNotification("Import finished", `Imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+          //giveNotification("Import finished", `Imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
+          giveNotification("Import finished", `Imported ${gnContainersDone} containers`);
 
           console.log(`readFromFile: done; imported ${gnContainersDone} containers and ${gnCookiesDone} cookies`);
-        });
+        //});
       });
 
     };
@@ -462,7 +466,8 @@ function giveNotification(sTitle, sMessage){
 function updateInfoMsg(){
   console.log(`updateInfoMsg: called`);
 
-  var sMsg = `The browser has ${gnContainersDone} containers, with a total of ${gnCookiesDone} cookies in them.`;
+  //var sMsg = `The browser has ${gnContainersDone} containers defined, with a total of ${gnCookiesDone} cookies in them.`;
+  var sMsg = `The browser has ${gnContainersDone} containers defined.`;
   sMsg += "<br /><br />";
   sMsg += `There are ${gArrFoundExtensionNames.length} container-handling extensions installed`;
 
@@ -507,9 +512,9 @@ function updateInfo(evt){
     if (bIdentitiesEnabled) {
 
       readIdentitiesFromBrowser().then(() => {
-        readCookiesFromBrowser().then(() => {
+        //readCookiesFromBrowser().then(() => {
           updateInfoMsg();
-        });
+        //});
       });
     
     }
@@ -535,7 +540,7 @@ function doExport(evt){
 
       } else {
 
-        readCookiesFromBrowser().then(() => {
+        //readCookiesFromBrowser().then(() => {
 
           saveToFile().then(() => {
 
@@ -544,7 +549,7 @@ function doExport(evt){
 
           });
 
-        });
+        //});
 
       }
     });
@@ -571,9 +576,9 @@ function doImport(evt){
     if (bDeleteAllExisting) {
 
       myDeleteAllIdentities().then(() => {
-        myDeleteCookieStores().then(() => {
+        //myDeleteCookieStores().then(() => {
           readFromFile();
-        });
+        //});
       });
 
     } else {
@@ -594,6 +599,10 @@ window.addEventListener('load', updateInfo);
 document.querySelector('#importfile').addEventListener('change', handleFileSelect);
 document.querySelector("#importform").addEventListener("submit", doImport);
 document.querySelector("#exportform").addEventListener("submit", doExport);
+
+//-------------------------------------------------------------------------------------
+
+/* Note: removed permissions "cookies", "storage", "<all_urls>" from manifest.json */
 
 
 //-------------------------------------------------------------------------------------

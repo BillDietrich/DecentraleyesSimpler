@@ -7,6 +7,15 @@
 
 <body>
 
+<font size="+1"><b>WARNING: this does NOT copy the "always open new tab for domain X in container Y" assignments for each container,
+and any cookies.  It copies only the container names and icons and colors.  So import should really
+only be used into a new profile with no containers set up yet.</b></font>
+<br /><br />
+&nbsp;
+<br /><br />
+&nbsp;
+<br /><br />
+
 <div id="infodiv" style="border: 2px solid black; margin: 2px; padding: 5px">
 &nbsp;
 <br /><br />
@@ -14,36 +23,49 @@
 </div>
 
 &nbsp;
-  <br />
-  &nbsp;
-  <br />
+<br />
+&nbsp;
+<br />
 
 <div style="border: 2px solid black; margin: 2px; padding: 5px">
-  <font size="+1"><b>Export container settings to file:</b></font>
-  <form id="exportform">
-      <button type="submit" >Save As ...</button>
-  </form>
-  </div>
+<font size="+1"><b>Export container settings to file:</b></font>
+<br /><br />
+<form id="exportform">
+    <button type="submit" >Save As ...</button>
+</form>
 </div>
 
 &nbsp;
-  <br />
-  &nbsp;
-  <br />
+<br />
+&nbsp;
+<br />
 
 <div style="border: 2px solid black; margin: 2px; padding: 5px">
-  <font size="+1"><b>Import container settings from file:</b></font>
-  <form id="importform">
-      <input type="file" id="importfile" accept=".json" >
-      <br />
-      <label>
-        <input type="checkbox" id="deleteallexisting">
-        Delete all existing containers and container settings
-      </label>
-      <br />
-      <button type="submit" >Import settings</button>
-  </form>
-  </div>
+<font size="+1"><b>Import container settings from file:</b></font>
+<br /><br />
+WARNING: this does NOT copy the "always open new tab for domain X in container Y" assignments for each container,
+and any cookies.  It copies only the container names and icons and colors.  So import should really
+only be used into a new profile with no containers set up yet.
+<br /><br />
+Importing:
+<ol>
+<li>Create new profile or use a profile that has no container settings in it.</li>
+<li>Install the various container-type extensions (Firefox Multi-Account Containers, Facebook Container, etc).</li>
+<li>Go through the "introduction" in some extensions (Firefox Multi-Account Containers).</li>
+<li>Use this extension to do import from file.</li>
+<li>Use the various container-type extensions to finish settings in the containers which were imported.</li>
+</ol>
+<br /><br />
+<form id="importform">
+    <input type="file" id="importfile" accept=".json" >
+    <br />
+    <label>
+      <input type="checkbox" id="deleteallexisting">
+      Delete all existing containers and container settings
+    </label>
+    <br />
+    <button type="submit" >Import settings</button>
+</form>
 </div>
 
 <script src="options.js"></script>

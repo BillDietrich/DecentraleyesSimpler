@@ -4,7 +4,7 @@
   "browser_action": {
       "default_title": "Containers settings export and import"
   },
-  "description": "Copy all Firefox container settings to/from a file.",
+  "description": "Copy top-level Firefox container settings to/from a file.",
   "homepage_url": "https://github.com/BillDietrich/ContainersExportImport",
   "manifest_version": 2,
   "icons": { "30": "icon30.png",
@@ -16,8 +16,8 @@
       "page": "options.html",
       "browser_style": true
   },
-  "permissions": ["contextualIdentities", "cookies", "downloads", "management", "notifications", "storage", "<all_urls>"],
-  "version": "1.1",
+  "permissions": ["contextualIdentities", "downloads", "management", "notifications" ],
+  "version": "1.2",
   "applications": {
       "gecko": {
           "id": "containersexportimport@billdietrich.me",
