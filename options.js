@@ -16,10 +16,23 @@ var gArrFoundExtensionIds = null;
 const gArrKnownContainerExtensionNames = [
               "Firefox Multi-Account Containers",
               "Facebook Container",
+              "Facebook Container - Expanded",
               "Google Container",
+              "Google Container - with Integrations",
+              "Google Container Minus YouTube",
               "Reddit Container",
+              "Twitter Container",
+              "Microsoft Container",
+              "SL - Shopping Container",
+              "Git Container",
+              "Porn Container",
+              "VK Container",
+              "Tumblr Container",
+              "Youtube Container",
+              "Temporary Containers",
               "Amazon Container"
               ];
+// there are more; I gave up trying to list them all
 
 
 //-------------------------------------------------------------------------------------
