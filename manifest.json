@@ -1,14 +1,14 @@
 
 {
-  "name": "Containers settings export import",
+  "name": "Decentraleyes simpler",
   "browser_action": {
-      "default_title": "Containers settings export and import"
+      "default_title": "Decentraleyes simpler"
   },
-  "description": "Copy top-level Firefox container settings to/from a file.",
-  "homepage_url": "https://github.com/BillDietrich/ContainersExportImport",
+  "description": "Eliminates most calls to common CDNs, by greatly increasing the time objects from the CDNs will remain in the browser cache.",
+  "homepage_url": "https://github.com/BillDietrich/DecentraleyesSimpler",
   "manifest_version": 2,
-  "icons": { "30": "icon30.png",
-           "60": "icon60.png" },
+  "icons": { "48": "icon48.png",
+           "96": "icon96.png" },
   "background": {
       "scripts": ["background.js"]
   },
@@ -16,12 +16,11 @@
       "page": "options.html",
       "browser_style": true
   },
-  "permissions": ["contextualIdentities", "downloads", "management", "notifications" ],
-  "version": "1.5",
+  "permissions": ["downloads", "notifications","storage","webRequest", "webRequestBlocking", "<all_urls>" ],
+  "version": "1.0",
   "applications": {
       "gecko": {
-          "id": "containersexportimport@billdietrich.me",
-          "strict_min_version": "57.0a1"
+          "id": "decentraleyessimpler@billdietrich.me"
       }
   }
 }
