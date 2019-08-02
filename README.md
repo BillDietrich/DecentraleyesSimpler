@@ -33,6 +33,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 ## Versions
 
 ### 1.0
+* Get the basics going.
 
 ## To-do
 * Remove add-on's icon in toolbar; make UI accessible only from add-on's Preferences button in browser's Add-ons page.  Import/export is so rare that this add-on shouldn't take up toolbar space with an icon.  But there seems to be no way to remove the icon there.

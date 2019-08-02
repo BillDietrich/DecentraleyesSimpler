@@ -12,10 +12,9 @@ addListeners();
 
 "use strict";
 
-var config ;
+var gConfig;
 var garrsURLsToCacheMore ;
-var gnCacheTime ;
-let sResponseHeaderCacheTime = "cachetime";
+var gnCacheMaxSecs ;
 
 
 
@@ -23,17 +22,18 @@ let sResponseHeaderCacheTime = "cachetime";
 
 function loadConfigFromStorage() {
   console.log("loadConfigFromStorage: called");
-  config = JSON.parse(localStorage.getItem('config'));	 
-  console.log("loadConfigFromStorage: return, config.arrsURLsToCacheMore " + config.arrsURLsToCacheMore + ", config.nCacheTime " + config.nCacheTime);
+  gConfig = JSON.parse(localStorage.getItem('config'));	 
+  gnCacheMaxSecs = gConfig.nCacheMaxSecs;
+  console.log("loadConfigFromStorage: return, gConfig.arrsURLsToCacheMore " + gConfig.arrsURLsToCacheMore + ", gConfig.nCacheMaxSecs " + gConfig.nCacheMaxSecs);
 }
 
 function createDefaultConfig() {
   console.log("createDefaultConfig: called");
   let garrsURLsToCacheMore = [];
   garrsURLsToCacheMore.push("https://www.test.com");
-  gnCacheTime = 9999999;
-  config = {arrsURLsToCacheMore:garrsURLsToCacheMore , nCacheTime:gnCacheTime};
-  console.log("createDefaultConfig: return, config.arrsURLsToCacheMore " + config.arrsURLsToCacheMore + ", config.nCacheTime " + config.nCacheTime);
+  gnCacheMaxSecs = 7 * 24 * 60 * 60;  // 1 week
+  gConfig = {arrsURLsToCacheMore:garrsURLsToCacheMore , nCacheMaxSecs:gnCacheMaxSecs};
+  console.log("createDefaultConfig: return, gConfig.arrsURLsToCacheMore " + gConfig.arrsURLsToCacheMore + ", gConfig.nCacheMaxSecs " + gConfig.nCacheMaxSecs);
 }
 
 // if configuration exists
@@ -46,7 +46,7 @@ else {
   console.log("No saved config; create default config");
   createDefaultConfig();
   // save configuration 
-  localStorage.setItem("config",JSON.stringify(config));
+  localStorage.setItem("config",JSON.stringify(gConfig));
 }
 
 
@@ -71,17 +71,20 @@ function gotRequestHeader(e) {
 */
 function gotResponseHeader(e) {
   console.log("gotResponseHeader: called, e.url " + e.url);
-  for (let sURL of config.garrsURLsToCacheMore) {
+  for (let sURL of gConfig.arrsURLsToCacheMore) {
     if (e.url.includes(sURL)) {
+      //console.log("gotResponseHeader: e.url " + e.url + " matches pattern " + sURL);
       for (let header of e.responseHeaders) {
-        if (header.name.toLowerCase() === sResponseHeaderCacheTime) {
-          console.log("gotResponseHeader: Modify response header :  name = " + header.name + ",old value=" + header.value +  ",new value=" + gnCacheTime  + " for url " + e.url);
-          header.value = gnCacheTime;
+        //console.log("gotResponseHeader: check header.name " + header.name + ", header.value " + header.value);
+        if (header.name.toLowerCase() === "cache-control") {
+          let sNewValue = "must-revalidate,max-age=" + gnCacheMaxSecs;
+          console.log("gotResponseHeader: Modify response header :  name = " + header.name + ", old value = " + header.value +  ", new value = " + sNewValue  + " for url " + e.url);
+          header.value = sNewValue;
         }
       }
     }
   }
-  console.log("gotResponseHeader: done, e.url " + e.url);
+  console.log("gotResponseHeader: done, e.responseHeaders " + e.responseHeaders);
   return {responseHeaders: e.responseHeaders};
 }
 
@@ -94,16 +97,22 @@ function gotResponseHeader(e) {
 * Make it "blocking" so we can modify the headers.
 */
 function addListeners() {
-  //let target = config.target_page;
+  console.log("addListeners: called");
+  //let target = gConfig.target_page;
   //if ((target==="*")||(target==="")||(target===" "))
-    let target="<all_urls>";
-  browser.webRequest.onBeforeSendHeaders.addListener(gotRequestHeader,
-                                          {urls: target.split(";")},
-                                          ["blocking", "requestHeaders"]);
+  let target="<all_urls>";
 
-  browser.webRequest.onHeadersReceived.addListener(gotResponseHeader,
+  browser.webRequest.onBeforeSendHeaders.addListener(
+                                          gotRequestHeader,
                                           {urls: target.split(";")},
-                                          ["blocking", "responseHeaders"]);
+                                          ["blocking", "requestHeaders"]
+                                          );
+
+  browser.webRequest.onHeadersReceived.addListener(
+                                          gotResponseHeader,
+                                          {urls: target.split(";")},
+                                          ["blocking", "responseHeaders"]
+                                          );
 }
 
 
@@ -112,6 +121,7 @@ function addListeners() {
 *
 */
 function removeListeners() {
+  console.log("removeListeners: called");
   browser.webRequest.onBeforeSendHeaders.removeListener(gotRequestHeader);
   browser.webRequest.onHeadersReceived.removeListener(gotResponseHeader);
 }

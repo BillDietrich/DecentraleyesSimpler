@@ -1,7 +1,7 @@
 
 //-------------------------------------------------------------------------------------
 
-var config;
+var gConfig;
 
 var gObjectURL = null;
 var gnDownloadID = 0;
@@ -31,8 +31,8 @@ function onChangedDownload(downloadDelta) {
     gObjectURL = null;
     gnDownloadID = 0;
     browser.downloads.onChanged.removeListener(onChangedDownload);
-    console.log(`onChangedDownload: export finished; exported ${config.arrsURLsToCacheMore.length} URLs`);
-    giveNotification("Export finished", `Exported ${config.arrsURLsToCacheMore.length} URLs`);
+    console.log(`onChangedDownload: export finished; exported ${gConfig.arrsURLsToCacheMore.length} URLs`);
+    giveNotification("Export finished", `Exported ${gConfig.arrsURLsToCacheMore.length} URLs`);
   }
 }
 
@@ -40,9 +40,9 @@ function saveToFile() {
   console.log(`saveToFile: called`);
       
   loadConfig();
-  console.log(`saveToFile: config == ${config}`);
+  console.log(`saveToFile: gConfig == ${gConfig}`);
 
-  var objectToSave = new Blob(new String(JSON.stringify(config, null, 2)));
+  var objectToSave = new Blob(new String(JSON.stringify(gConfig, null, 2)));
 
   gObjectURL = URL.createObjectURL(objectToSave);
   
@@ -75,12 +75,12 @@ function readFromFile() {
     gFileReader.onload = function(evt) {
       console.log(`readFromFile: readAsText result ${evt.target.result}`);
  
-      config = JSON.parse(evt.target.result);
+      gConfig = JSON.parse(evt.target.result);
 
       updateInfoMsg();
-      giveNotification("Import finished", `Imported ${config.arrsURLsToCacheMore.length} URLs`);
+      giveNotification("Import finished", `Imported ${gConfig.arrsURLsToCacheMore.length} URLs`);
 
-      console.log(`readFromFile: done; imported ${config.arrsURLsToCacheMore.length} URLs`);
+      console.log(`readFromFile: done; imported ${gConfig.arrsURLsToCacheMore.length} URLs`);
 
     };
 
@@ -114,9 +114,9 @@ function giveNotification(sTitle, sMessage){
 function updateInfoMsg(){
   console.log(`updateInfoMsg: called`);
 
-  var sMsg = `The add-on has ${config.arrsURLsToCacheMore.length} URLs defined.`;
+  var sMsg = `The add-on has ${gConfig.arrsURLsToCacheMore.length} URLs defined.`;
   sMsg += "<br /><br />"
-  sMsg += "Cache time is set to " + config.nCacheTime;
+  sMsg += "Cache max age for matching items is set to " + gConfig.nCacheMaxSecs + " seconds.";
 
   document.querySelector('#infodiv').innerHTML = sMsg;
   console.log(`updateInfoMsg: return`);
@@ -135,7 +135,7 @@ function handleFileSelect(evt){
 }
 
 function loadConfig(){
-  config = JSON.parse(localStorage.getItem('config'));
+  gConfig = JSON.parse(localStorage.getItem('config'));
 }
 
 function loadOptionsPage(evt){
