@@ -16,11 +16,12 @@
       "page": "options.html",
       "browser_style": true
   },
-  "permissions": ["downloads", "notifications","storage","webRequest", "webRequestBlocking", "<all_urls>" ],
+  "permissions": ["downloads", "notifications", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
   "version": "1.0",
   "applications": {
       "gecko": {
-          "id": "decentraleyessimpler@billdietrich.me"
+          "id": "decentraleyessimpler@billdietrich.me",
+          "strict_min_version": "45"
       }
   }
 }

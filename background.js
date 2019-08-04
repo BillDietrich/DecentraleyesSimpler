@@ -29,9 +29,9 @@ function loadConfigFromStorage() {
 
 function createDefaultConfig() {
   console.log("createDefaultConfig: called");
-  let garrsURLsToCacheMore = [];
-  garrsURLsToCacheMore.push("https://www.test.com");
-  gnCacheMaxSecs = 7 * 24 * 60 * 60;  // 1 week
+  garrsURLsToCacheMore = [];
+  garrsURLsToCacheMore.push("https://www.billdietrich.me/index.html");
+  gnCacheMaxSecs = 30 * 24 * 60 * 60;  // 30 days
   gConfig = {arrsURLsToCacheMore:garrsURLsToCacheMore , nCacheMaxSecs:gnCacheMaxSecs};
   console.log("createDefaultConfig: return, gConfig.arrsURLsToCacheMore " + gConfig.arrsURLsToCacheMore + ", gConfig.nCacheMaxSecs " + gConfig.nCacheMaxSecs);
 }
@@ -52,50 +52,56 @@ else {
 
 //-------------------------------------------------------------------------------------
 
-/*
-* Got a request header
-*
-*/
 function gotRequestHeader(e) {
-  console.log("gotRequestHeader: e.url " + e.url);
-  
-  return {requestHeaders: e.requestHeaders};
+  for (let sURL of gConfig.arrsURLsToCacheMore) {
+    if (e.url.includes(sURL)) {
+      console.log("gotRequestHeader: e.url " + e.url);
+      for (let header of e.requestHeaders) {
+        console.log("gotRequestHeader: header.name " + header.name + ", header.value " + header.value);
+      }
+      return;
+    }
+  }
 }
 
 
 //-------------------------------------------------------------------------------------
 
-/*
-* Got a response header
-*
-*/
 function gotResponseHeader(e) {
-  console.log("gotResponseHeader: called, e.url " + e.url);
+  //console.log("gotResponseHeader: called, e.url " + e.url);
   for (let sURL of gConfig.arrsURLsToCacheMore) {
     if (e.url.includes(sURL)) {
-      //console.log("gotResponseHeader: e.url " + e.url + " matches pattern " + sURL);
+      console.log("gotResponseHeader: e.url " + e.url + " matches pattern " + sURL);
+      var newResponseHeaders = [];
+      var bFoundCacheControl = false;
+      //let sNewCacheControlValue = "must-revalidate,max-age=" + gnCacheMaxSecs;
+      let sNewCacheControlValue = "max-age=" + gnCacheMaxSecs;
       for (let header of e.responseHeaders) {
         //console.log("gotResponseHeader: check header.name " + header.name + ", header.value " + header.value);
         if (header.name.toLowerCase() === "cache-control") {
-          let sNewValue = "must-revalidate,max-age=" + gnCacheMaxSecs;
-          console.log("gotResponseHeader: Modify response header :  name = " + header.name + ", old value = " + header.value +  ", new value = " + sNewValue  + " for url " + e.url);
-          header.value = sNewValue;
+          bFoundCacheControl = true;
+          //console.log("gotResponseHeader:  url " + e.url + ", modify header " + header.name + " from '" + header.value +  "' to '" + sNewCacheControlValue + "'");
+          header.value = sNewCacheControlValue;
         }
+        console.log("gotResponseHeader:  push header " + header.name + " value '" + header.value + "'");
+        newResponseHeaders.push(header);
       }
+      if (!bFoundCacheControl) {
+        var header = {name:"Cache-Control", value:sNewCacheControlValue};
+        console.log("gotResponseHeader:  push header " + header.name + " value '" + header.value + "'");
+        newResponseHeaders.push(header);
+      }
+      //console.log("gotResponseHeader: done, matched, newResponseHeaders " + newResponseHeaders);
+      return {responseHeaders: newResponseHeaders};
     }
   }
-  console.log("gotResponseHeader: done, e.responseHeaders " + e.responseHeaders);
+  //console.log("gotResponseHeader: done, not matched, e.responseHeaders " + e.responseHeaders);
   return {responseHeaders: e.responseHeaders};
 }
 
 
 //-------------------------------------------------------------------------------------
 
-/*
-* Add gotRequestHeader as a listener to onBeforeSendHeaders, only for the target pages.
-* Add gotResponseHeader as a listener to onHeadersReceived, only for the target pages.
-* Make it "blocking" so we can modify the headers.
-*/
 function addListeners() {
   console.log("addListeners: called");
   //let target = gConfig.target_page;
@@ -115,11 +121,6 @@ function addListeners() {
                                           );
 }
 
-
-/*
-* Remove the two listeners
-*
-*/
 function removeListeners() {
   console.log("removeListeners: called");
   browser.webRequest.onBeforeSendHeaders.removeListener(gotRequestHeader);
