@@ -1,12 +1,16 @@
 
 //-------------------------------------------------------------------------------------
 
-var gConfig;
+
+var garrsURLMatchPatterns;
+
+var gnCacheMaxSecs;
+
+
+//-------------------------------------------------------------------------------------
 
 var gObjectURL = null;
 var gnDownloadID = 0;
-
-
 
  
 function onStartedDownload(id) {
@@ -31,8 +35,8 @@ function onChangedDownload(downloadDelta) {
     gObjectURL = null;
     gnDownloadID = 0;
     browser.downloads.onChanged.removeListener(onChangedDownload);
-    console.log(`onChangedDownload: export finished; exported ${gConfig.arrsURLsToCacheMore.length} URLs`);
-    giveNotification("Export finished", `Exported ${gConfig.arrsURLsToCacheMore.length} URLs`);
+    console.log(`onChangedDownload: export finished; exported ${garrsURLMatchPatterns.length} URLs`);
+    giveNotification("Export finished", `Exported ${garrsURLMatchPatterns.length} URLs`);
   }
 }
 
@@ -40,9 +44,10 @@ function saveToFile() {
   console.log(`saveToFile: called`);
       
   loadConfig();
-  console.log(`saveToFile: gConfig == ${gConfig}`);
+  console.log(`saveToFile: garrsURLMatchPatterns == ${garrsURLMatchPatterns},  gnCacheMaxSecs == ${gnCacheMaxSecs}`);
 
-  var objectToSave = new Blob(new String(JSON.stringify(gConfig, null, 2)));
+  config = {arrsURLMatchPatterns:garrsURLMatchPatterns , nCacheMaxSecs:gnCacheMaxSecs};
+  var objectToSave = new Blob(new String(JSON.stringify(config, null, 2)));
 
   gObjectURL = URL.createObjectURL(objectToSave);
   
@@ -75,12 +80,14 @@ function readFromFile() {
     gFileReader.onload = function(evt) {
       console.log(`readFromFile: readAsText result ${evt.target.result}`);
  
-      gConfig = JSON.parse(evt.target.result);
+      let config = JSON.parse(evt.target.result);
+      garrsURLMatchPatterns = config.arrsURLMatchPatterns;
+      gnCacheMaxSecs = config.nCacheMaxSecs;
 
       updateInfoMsg();
-      giveNotification("Import finished", `Imported ${gConfig.arrsURLsToCacheMore.length} URLs`);
+      giveNotification("Import finished", `Imported ${garrsURLMatchPatterns.length} URLs`);
 
-      console.log(`readFromFile: done; imported ${gConfig.arrsURLsToCacheMore.length} URLs`);
+      console.log(`readFromFile: done; imported ${garrsURLMatchPatterns.length} URLs`);
 
     };
 
@@ -114,9 +121,9 @@ function giveNotification(sTitle, sMessage){
 function updateInfoMsg(){
   console.log(`updateInfoMsg: called`);
 
-  var sMsg = `The add-on has ${gConfig.arrsURLsToCacheMore.length} URLs defined.`;
+  var sMsg = `The add-on has ${garrsURLMatchPatterns.length} patterns defined.`;
   sMsg += "<br /><br />"
-  sMsg += "Cache max age for matching items is set to " + gConfig.nCacheMaxSecs + " seconds.";
+  sMsg += "Cache max age for matching items is set to " + gnCacheMaxSecs + " seconds.";
 
   document.querySelector('#infodiv').innerHTML = sMsg;
   console.log(`updateInfoMsg: return`);
@@ -135,7 +142,9 @@ function handleFileSelect(evt){
 }
 
 function loadConfig(){
-  gConfig = JSON.parse(localStorage.getItem('config'));
+  let config = JSON.parse(localStorage.getItem('config'));
+  garrsURLMatchPatterns = config.arrsURLMatchPatterns;
+  gnCacheMaxSecs = config.nCacheMaxSecs;
 }
 
 function loadOptionsPage(evt){
@@ -166,6 +175,10 @@ function doImport(evt){
   console.log(`doImport: evt ${evt}`);
 
   readFromFile();
+
+  // calling functions in other file; doesn't work !!!
+  removeListeners();
+  addListeners();
 
   // don't submit the form
   evt.preventDefault();
