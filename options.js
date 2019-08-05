@@ -89,6 +89,9 @@ function readFromFile() {
 
       console.log(`readFromFile: done; imported ${garrsURLMatchPatterns.length} URLs`);
 
+      // send message to background file
+      browser.runtime.sendMessage({type:'configChanged'});
+
     };
 
     gFileReader.readAsText(gFile);
@@ -123,7 +126,25 @@ function updateInfoMsg(){
 
   var sMsg = `The add-on has ${garrsURLMatchPatterns.length} patterns defined.`;
   sMsg += "<br /><br />"
-  sMsg += "Cache max age for matching items is set to " + gnCacheMaxSecs + " seconds.";
+  sMsg += "Cache max age for matching items is set to ";
+  
+  let hour = 60 * 60;
+  let day = 24 * hour;
+  let week = 7 * day;
+  let month = 30 * day;
+  let year = 365 * day;
+  if (gnCacheMaxSecs < hour)
+    sMsg += (gnCacheMaxSecs + " seconds.");
+  else if (gnCacheMaxSecs < day)
+    sMsg += (gnCacheMaxSecs/hour + " hours.");
+  else if (gnCacheMaxSecs < week)
+    sMsg += (gnCacheMaxSecs/day + " days.");
+  else if (gnCacheMaxSecs < month)
+    sMsg += (gnCacheMaxSecs/week + " weeks.");
+  else if (gnCacheMaxSecs < year)
+    sMsg += (gnCacheMaxSecs/month + " months.");
+  else
+    sMsg += (gnCacheMaxSecs/year + " years.");
 
   document.querySelector('#infodiv').innerHTML = sMsg;
   console.log(`updateInfoMsg: return`);
@@ -175,10 +196,6 @@ function doImport(evt){
   console.log(`doImport: evt ${evt}`);
 
   readFromFile();
-
-  // calling functions in other file; doesn't work !!!
-  removeListeners();
-  addListeners();
 
   // don't submit the form
   evt.preventDefault();

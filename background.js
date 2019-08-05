@@ -5,6 +5,7 @@ function handleClick() {
 }
 
 
+
 //-------------------------------------------------------------------------------------
 
 "use strict";
@@ -51,11 +52,27 @@ function doStartup() {
     localStorage.setItem("config",JSON.stringify(config));
   }
 
+  // connection to make options page appear
   browser.browserAction.onClicked.addListener(handleClick);
+
+  // listeners to handle HTTP requests and responses
   addListeners();
+
+  // connection to let options page tell this page that the config has changed
+  browser.runtime.onMessage.addListener(receiveConfigChangedMessage);
 
   console.log("doStartup: return");
 }
+
+function receiveConfigChangedMessage(message,sender,sendResponse) {
+  console.log("receiveConfigChangedMessage: called");
+  if (message.type === "configChanged") {
+    console.log("receiveConfigChangedMessage: config changed");
+    removeListeners();
+    addListeners();
+  }
+}
+
 
 //-------------------------------------------------------------------------------------
 

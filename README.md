@@ -1,6 +1,6 @@
 # Decentraleyes simpler
 
-WARNING: JUST STARTED CREATING THIS, NOT EVEN CLOSE TO USABLE YET !!!
+WARNING: DON'T USE YET !!!  BASICS WORK BUT THE CDN PATTERNS ARE NOT PUT IN YET.
 
 ![Do not use](http://4.bp.blogspot.com/-1lTbJMSPZaE/Tyu0eri0bOI/AAAAAAAAEP0/L6yk8jqGUwI/s1600/abnormal%2Bbrain.jpg "Do not use")
 
@@ -40,6 +40,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 
 ## Development
 * Use Firefox about:cache to see what is in the cache.
+* Add and delete a file from web site to verify that it is being accessed from cache when it is not present on the web site.
 
 
 ## Privacy Policy
