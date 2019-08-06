@@ -10,9 +10,9 @@ function handleClick() {
 
 "use strict";
 
-var garrsURLMatchPatterns;
-
 var gnCacheMaxSecs;
+
+var garrsURLPatterns;
 
 
 
@@ -21,18 +21,18 @@ var gnCacheMaxSecs;
 function loadConfigFromStorage() {
   console.log("loadConfigFromStorage: called");
   config = JSON.parse(localStorage.getItem('config'));	 
-  garrsURLMatchPatterns = config.arrsURLMatchPatterns;
   gnCacheMaxSecs = config.nCacheMaxSecs;
-  console.log("loadConfigFromStorage: return, garrsURLMatchPatterns " + garrsURLMatchPatterns + ", gnCacheMaxSecs " + gnCacheMaxSecs);
+  garrsURLPatterns = config.arrsURLPatterns;
+  console.log("loadConfigFromStorage: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns);
 }
 
 function createDefaultConfig() {
   console.log("createDefaultConfig: called");
-  garrsURLMatchPatterns = [];
-  //garrsURLMatchPatterns.push("https://www.billdietrich.me/test1.txt");
-  garrsURLMatchPatterns.push("*://*.billdietrich.me/test1.txt");
   gnCacheMaxSecs = 30 * 24 * 60 * 60;  // 30 days
-  console.log("createDefaultConfig: return, garrsURLMatchPatterns " + garrsURLMatchPatterns + ", gnCacheMaxSecs " + gnCacheMaxSecs);
+  garrsURLPatterns = [];
+  //garrsURLPatterns.push("https://www.billdietrich.me/test1.txt");
+  garrsURLPatterns.push("*://*.billdietrich.me/test1.txt");
+  console.log("createDefaultConfig: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns);
 }
 
 function doStartup() {
@@ -48,7 +48,7 @@ function doStartup() {
     console.log("No saved config; create default config");
     createDefaultConfig();
     // save configuration 
-    config = {arrsURLMatchPatterns:garrsURLMatchPatterns , nCacheMaxSecs:gnCacheMaxSecs};
+    config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns};
     localStorage.setItem("config",JSON.stringify(config));
   }
 
@@ -124,14 +124,14 @@ function addListeners() {
   browser.webRequest.onBeforeSendHeaders.addListener(
                                           gotRequestHeader,
                                           //{urls: target},               // filter
-                                          {urls: garrsURLMatchPatterns},  // filter
+                                          {urls: garrsURLPatterns},  // filter
                                           ["blocking", "requestHeaders"]  // extraInfoSpec
                                           );
 
   browser.webRequest.onHeadersReceived.addListener(
                                           gotResponseHeader,
                                           //{urls: target},               // filter
-                                          {urls: garrsURLMatchPatterns},  // filter
+                                          {urls: garrsURLPatterns},  // filter
                                           ["blocking", "responseHeaders"] // extraInfoSpec
                                           );
 }

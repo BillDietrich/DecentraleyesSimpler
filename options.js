@@ -2,9 +2,9 @@
 //-------------------------------------------------------------------------------------
 
 
-var garrsURLMatchPatterns;
-
 var gnCacheMaxSecs;
+
+var garrsURLPatterns;
 
 
 //-------------------------------------------------------------------------------------
@@ -35,8 +35,8 @@ function onChangedDownload(downloadDelta) {
     gObjectURL = null;
     gnDownloadID = 0;
     browser.downloads.onChanged.removeListener(onChangedDownload);
-    console.log(`onChangedDownload: export finished; exported ${garrsURLMatchPatterns.length} URLs`);
-    giveNotification("Export finished", `Exported ${garrsURLMatchPatterns.length} URLs`);
+    console.log(`onChangedDownload: export finished; exported ${garrsURLPatterns.length} URL patterns`);
+    giveNotification("Export finished", `Exported ${garrsURLPatterns.length} URL patterns`);
   }
 }
 
@@ -44,9 +44,9 @@ function saveToFile() {
   console.log(`saveToFile: called`);
       
   loadConfig();
-  console.log(`saveToFile: garrsURLMatchPatterns == ${garrsURLMatchPatterns},  gnCacheMaxSecs == ${gnCacheMaxSecs}`);
+  console.log(`saveToFile: gnCacheMaxSecs == ${gnCacheMaxSecs}, garrsURLPatterns == ${garrsURLPatterns}`);
 
-  config = {arrsURLMatchPatterns:garrsURLMatchPatterns , nCacheMaxSecs:gnCacheMaxSecs};
+  config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns};
   var objectToSave = new Blob(new String(JSON.stringify(config, null, 2)));
 
   gObjectURL = URL.createObjectURL(objectToSave);
@@ -81,16 +81,19 @@ function readFromFile() {
       console.log(`readFromFile: readAsText result ${evt.target.result}`);
  
       let config = JSON.parse(evt.target.result);
-      garrsURLMatchPatterns = config.arrsURLMatchPatterns;
       gnCacheMaxSecs = config.nCacheMaxSecs;
+      garrsURLPatterns = config.arrsURLPatterns;
 
       updateInfoMsg();
-      giveNotification("Import finished", `Imported ${garrsURLMatchPatterns.length} URLs`);
+      giveNotification("Import finished", `Imported ${garrsURLPatterns.length} URL patterns`);
 
-      console.log(`readFromFile: done; imported ${garrsURLMatchPatterns.length} URLs`);
+      console.log(`readFromFile: done; imported ${garrsURLPatterns.length} URL patterns`);
+
+      // clear the browser cache
+      var removeCachePromise = browser.browsingData.removeCache({});
 
       // send message to background file
-      browser.runtime.sendMessage({type:'configChanged'});
+      browser.runtime.sendMessage({type:'configChanged'}).then(onCacheRemoved, onCacheRemovedError);
 
     };
 
@@ -99,6 +102,15 @@ function readFromFile() {
   }
     
   console.log(`readFromFile: return`);
+}
+
+function onCacheRemoved() {
+  console.log("onCacheRemoved: called");
+}
+
+function onCacheRemovedError(error) {
+  console.log("onCacheRemovedError: called");
+  console.error(error);
 }
 
 
@@ -124,7 +136,7 @@ function giveNotification(sTitle, sMessage){
 function updateInfoMsg(){
   console.log(`updateInfoMsg: called`);
 
-  var sMsg = `The add-on has ${garrsURLMatchPatterns.length} patterns defined.`;
+  var sMsg = `The add-on has ${garrsURLPatterns.length} URL patterns defined.`;
   sMsg += "<br /><br />"
   sMsg += "Cache max age for matching items is set to ";
   
@@ -136,15 +148,15 @@ function updateInfoMsg(){
   if (gnCacheMaxSecs < hour)
     sMsg += (gnCacheMaxSecs + " seconds.");
   else if (gnCacheMaxSecs < day)
-    sMsg += (gnCacheMaxSecs/hour + " hours.");
+    sMsg += ((gnCacheMaxSecs/hour).toFixed(1) + " hours.");
   else if (gnCacheMaxSecs < week)
-    sMsg += (gnCacheMaxSecs/day + " days.");
+    sMsg += ((gnCacheMaxSecs/day).toFixed(1) + " days.");
   else if (gnCacheMaxSecs < month)
-    sMsg += (gnCacheMaxSecs/week + " weeks.");
+    sMsg += ((gnCacheMaxSecs/week).toFixed(1) + " weeks.");
   else if (gnCacheMaxSecs < year)
-    sMsg += (gnCacheMaxSecs/month + " months.");
+    sMsg += ((gnCacheMaxSecs/month).toFixed(1) + " months.");
   else
-    sMsg += (gnCacheMaxSecs/year + " years.");
+    sMsg += ((gnCacheMaxSecs/year).toFixed(1) + " years.");
 
   document.querySelector('#infodiv').innerHTML = sMsg;
   console.log(`updateInfoMsg: return`);
@@ -164,8 +176,8 @@ function handleFileSelect(evt){
 
 function loadConfig(){
   let config = JSON.parse(localStorage.getItem('config'));
-  garrsURLMatchPatterns = config.arrsURLMatchPatterns;
   gnCacheMaxSecs = config.nCacheMaxSecs;
+  garrsURLPatterns = config.arrsURLPatterns;
 }
 
 function loadOptionsPage(evt){

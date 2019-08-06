@@ -16,7 +16,7 @@
       "page": "options.html",
       "browser_style": true
   },
-  "permissions": ["downloads", "notifications", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
+  "permissions": ["browsingData", "downloads", "notifications", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
   "version": "1.0",
   "applications": {
       "gecko": {
