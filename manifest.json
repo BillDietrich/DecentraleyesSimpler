@@ -16,12 +16,13 @@
       "page": "options.html",
       "browser_style": true
   },
-  "permissions": ["browsingData", "downloads", "notifications", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
+  "permissions": ["browserSettings", "browsingData", "downloads", "notifications", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
   "version": "1.0",
   "applications": {
       "gecko": {
           "id": "decentraleyessimpler@billdietrich.me",
           "strict_min_version": "45"
       }
-  }
+  },
+  "web_accessible_resources": ["defaultconfig.json"]
 }

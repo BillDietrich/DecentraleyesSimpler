@@ -181,6 +181,25 @@ function loadConfig(){
 }
 
 function loadOptionsPage(evt){
+  var getting = browser.browserSettings.cacheEnabled.get({});
+  getting.then((got) => {
+    console.log(`loadOptionsPage: browserSettings.cacheEnabled: Value: ${got.value}`);
+    console.log(`loadOptionsPage: browserSettings.cacheEnabled: Control: ${got.levelOfControl}`);
+  });
+
+  var gettingSelf = browser.management.getSelf();
+  gettingSelf.then((got) => {
+    console.log(`loadOptionsPage: management.getSelf: id: ${got.id}`);
+    console.log(`loadOptionsPage: management.getSelf: name: ${got.name}`);
+  });
+
+  var manifest = browser.runtime.getManifest();
+  console.log(`loadOptionsPage: management.getSelf: manifest.name: ${manifest.name}`);
+  console.log(`loadOptionsPage: management.getSelf: manifest.extra: ${manifest.extra}`);
+
+  let sPath = browser.runtime.getURL("defaultconfig.json");
+  console.log(`loadOptionsPage: sPath ${sPath}`);
+
   loadConfig();
   updateInfoMsg();
 }
@@ -222,3 +241,16 @@ document.querySelector("#importform").addEventListener("submit", doImport);
 document.querySelector("#exportform").addEventListener("submit", doExport);
 
 //-------------------------------------------------------------------------------------
+
+/*
+
+
+			const extId = browser.extId = process.argv[5];
+			if (process.env.MOZ_CRASHREPORTER_EVENTS_DIRECTORY) {
+				browser.profileDir = Path.resolve(process.env.MOZ_CRASHREPORTER_EVENTS_DIRECTORY, '../..');
+			} else {
+				throw new Error(`MOZ_CRASHREPORTER_EVENTS_DIRECTORY environment variable not set by Firefox`);
+				// either -P / -p "profile_name" or -profile "profile_path" (precedence?) default: FS.readFileSync('%AppData%\Mozilla\Firefox\profiles.ini').trim().split(/(?:\r\n?\n){2}/g).find(_=>_.includes('Default=1')).match(/Path=(.*))[1]
+			}
+*/
+

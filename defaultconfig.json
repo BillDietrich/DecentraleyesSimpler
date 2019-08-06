@@ -1,0 +1,8 @@
+{
+  "nCacheMaxSecs": 2592000,
+  "arrsURLPatterns": [
+    "*://*.billdietrich.me/test1.txt",
+    "*://*.billdietrich.me/test2.txt"
+  ]
+}
+

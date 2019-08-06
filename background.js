@@ -37,7 +37,7 @@ function createDefaultConfig() {
 
 function doStartup() {
   console.log("doStartup: called");
- 
+
   // if configuration exists
   if (localStorage.getItem('config')) {
     console.log("Saved config exists; load it");
