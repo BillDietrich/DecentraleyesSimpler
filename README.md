@@ -31,8 +31,12 @@ Instead, this "Decentraleyes simpler" add-on comes with only a list of CDN URL p
 
 So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to trust a developer to load scripts accurately, or rely on them to update scripts.  You will get the latest version of a script the first time you access it.  After that, the browser will not contact the CDN until the cached copy expires.  You control how long scripts will be cached before the browser checks for a new version.  Any time you want to force **all** the scripts to be updated, just flush your browser's cache.  Also, you can see and modify the list of URL patterns affected by this add-on (although you have to edit a JSON file to do so).  You could add patterns to increase caching of any sites you wished, not just major CDNs.
 
-## Quirks
+## Quirks / Notes
+* To see and change the settings and patterns used by this add-on, you have to export the info to a JSON file, edit that file, and import the changed file back into the add-on.  There is no nice GUI for seeing and changing settings, sorry.
+* Default list of URL patterns is mostly copied from the mappings.js file in the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.  But there's a lot of complexity in that add-on that is not replicated in this add-on.
+* By default, this add-on operates on fonts, images, scripts, and stylesheets.
 * Clearing the browser cache clears the **whole** cache, not just items that match this add-on's URL patterns.
+* Cache expiration time is set for items that match, even if their expiration time already is **longer** than the time specified for this add-on.
 * A determined CDN could defeat this type of add-on, by generating script or image names that are unique for each user session.
 
 ## Versions

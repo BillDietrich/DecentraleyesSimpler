@@ -6,6 +6,9 @@ var gnCacheMaxSecs;
 
 var garrsURLPatterns;
 
+var garrsResourceTypes;
+
+
 
 //-------------------------------------------------------------------------------------
 
@@ -44,9 +47,9 @@ function saveToFile() {
   console.log(`saveToFile: called`);
       
   loadConfig();
-  console.log(`saveToFile: gnCacheMaxSecs == ${gnCacheMaxSecs}, garrsURLPatterns == ${garrsURLPatterns}`);
+  console.log(`saveToFile: gnCacheMaxSecs == ${gnCacheMaxSecs}, garrsURLPatterns == ${garrsURLPatterns}, garrsResourceTypes == ${garrsResourceTypes}`);
 
-  config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns};
+  config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns, arrsResourceTypes:garrsResourceTypes};
   var objectToSave = new Blob(new String(JSON.stringify(config, null, 2)));
 
   gObjectURL = URL.createObjectURL(objectToSave);
@@ -83,6 +86,7 @@ function readFromFile() {
       let config = JSON.parse(evt.target.result);
       gnCacheMaxSecs = config.nCacheMaxSecs;
       garrsURLPatterns = config.arrsURLPatterns;
+      garrsResourceTypes = config.arrsResourceTypes;
 
       updateInfoMsg();
       giveNotification("Import finished", `Imported ${garrsURLPatterns.length} URL patterns`);
@@ -157,7 +161,11 @@ function updateInfoMsg(){
     sMsg += ((gnCacheMaxSecs/month).toFixed(1) + " months.");
   else
     sMsg += ((gnCacheMaxSecs/year).toFixed(1) + " years.");
-
+ 
+  sMsg += "<br /><br />"
+  sMsg += "Matching items of the following types are affected: ";
+  sMsg += garrsResourceTypes;
+ 
   document.querySelector('#infodiv').innerHTML = sMsg;
   console.log(`updateInfoMsg: return`);
 }
@@ -178,6 +186,7 @@ function loadConfig(){
   let config = JSON.parse(localStorage.getItem('config'));
   gnCacheMaxSecs = config.nCacheMaxSecs;
   garrsURLPatterns = config.arrsURLPatterns;
+  garrsResourceTypes = config.arrsResourceTypes;
 }
 
 function loadOptionsPage(evt){

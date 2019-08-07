@@ -14,6 +14,9 @@ var gnCacheMaxSecs;
 
 var garrsURLPatterns;
 
+// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/ResourceType
+var garrsResourceTypes;
+
 
 
 //-------------------------------------------------------------------------------------
@@ -23,16 +26,21 @@ function loadConfigFromStorage() {
   config = JSON.parse(localStorage.getItem('config'));	 
   gnCacheMaxSecs = config.nCacheMaxSecs;
   garrsURLPatterns = config.arrsURLPatterns;
-  console.log("loadConfigFromStorage: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns);
+  garrsResourceTypes = config.arrsResourceTypes;
+  console.log("loadConfigFromStorage: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns + ", garrsResourceTypes " + garrsResourceTypes);
 }
 
 function createDefaultConfig() {
   console.log("createDefaultConfig: called");
   gnCacheMaxSecs = 30 * 24 * 60 * 60;  // 30 days
   garrsURLPatterns = [];
-  //garrsURLPatterns.push("https://www.billdietrich.me/test1.txt");
-  garrsURLPatterns.push("*://*.billdietrich.me/test1.txt");
-  console.log("createDefaultConfig: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns);
+  garrsURLPatterns.push("*://*.billdietrich.me/*");
+  garrsResourceTypes = [];
+  garrsResourceTypes.push("font");
+  garrsResourceTypes.push("image");
+  garrsResourceTypes.push("script");
+  garrsResourceTypes.push("stylesheet");
+  console.log("createDefaultConfig: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns + ", garrsResourceTypes " + garrsResourceTypes);
 }
 
 function doStartup() {
@@ -48,7 +56,7 @@ function doStartup() {
     console.log("No saved config; create default config");
     createDefaultConfig();
     // save configuration 
-    config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns};
+    config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns, arrsResourceTypes:garrsResourceTypes};
     localStorage.setItem("config",JSON.stringify(config));
   }
 
@@ -77,7 +85,7 @@ function receiveConfigChangedMessage(message,sender,sendResponse) {
 //-------------------------------------------------------------------------------------
 
 function gotRequestHeader(e) {
-  console.log("gotRequestHeader: e.url " + e.url);
+  console.log("gotRequestHeader: e.url " + e.url + ", e.type " + e.type);
   for (let header of e.requestHeaders) {
     //console.log("gotRequestHeader: header.name " + header.name + ", header.value " + header.value);
   }
@@ -87,7 +95,7 @@ function gotRequestHeader(e) {
 //-------------------------------------------------------------------------------------
 
 function gotResponseHeader(e) {
-  console.log("gotResponseHeader: called, e.url " + e.url);
+  console.log("gotResponseHeader: called, e.url " + e.url + ", e.type " + e.type);
   var newResponseHeaders = [];
   var bFoundCacheControl = false;
   //let sNewCacheControlValue = "must-revalidate,max-age=" + gnCacheMaxSecs;
@@ -116,22 +124,29 @@ function gotResponseHeader(e) {
 
 function addListeners() {
   console.log("addListeners: called");
-  //let target="<all_urls>";
 
-  // for filter argument urls component:
+  // For filter argument "urls" component:
   // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns
+
+  // Filter argument "types" component is a little strange.
+  // If you load an address such as domain.com/test.js, the request
+  // and response for test.js will have type "main_frame", not "script".
+  // If you load an address such as domain.com/page.html which then loads test.js, the request
+  // and response for test.js will have type script".
 
   browser.webRequest.onBeforeSendHeaders.addListener(
                                           gotRequestHeader,
-                                          //{urls: target},               // filter
-                                          {urls: garrsURLPatterns},  // filter
+                                          //{urls: "<all_urls>"},    // filter
+                                          //{urls: garrsURLPatterns},  // filter
+                                          {urls: garrsURLPatterns, types: garrsResourceTypes},  // filter
                                           ["blocking", "requestHeaders"]  // extraInfoSpec
                                           );
 
   browser.webRequest.onHeadersReceived.addListener(
                                           gotResponseHeader,
-                                          //{urls: target},               // filter
-                                          {urls: garrsURLPatterns},  // filter
+                                          //{urls: "<all_urls>"},    // filter
+                                          //{urls: garrsURLPatterns},  // filter
+                                          {urls: garrsURLPatterns, types: garrsResourceTypes},  // filter
                                           ["blocking", "responseHeaders"] // extraInfoSpec
                                           );
 }
