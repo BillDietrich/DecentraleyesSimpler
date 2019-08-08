@@ -1,6 +1,6 @@
 # Decentraleyes simpler
 
-WARNING: DON'T USE YET !!!  BASICS WORK BUT THE CDN PATTERNS ARE NOT PUT IN YET.
+WARNING: DON'T USE YET !!!  STARTED TESTING IT, THE CDN PATTERNS ARE UNTESTED.
 
 ![Do not use](http://4.bp.blogspot.com/-1lTbJMSPZaE/Tyu0eri0bOI/AAAAAAAAEP0/L6yk8jqGUwI/s1600/abnormal%2Bbrain.jpg "Do not use")
 
