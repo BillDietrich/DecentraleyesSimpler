@@ -131,7 +131,7 @@ function receiveConfigChangedMessage(message,sender,sendResponse) {
 //-------------------------------------------------------------------------------------
 
 function gotRequestHeader(e) {
-  console.log("gotRequestHeader: e.url " + e.url + ", e.type " + e.type);
+  console.log("gotRequestHeader: called, " + e.url + ", e.type " + e.type);
   for (let header of e.requestHeaders) {
     //console.log("gotRequestHeader: header.name " + header.name + ", header.value " + header.value);
   }
@@ -141,7 +141,7 @@ function gotRequestHeader(e) {
 //-------------------------------------------------------------------------------------
 
 function gotResponseHeader(e) {
-  console.log("gotResponseHeader: called, e.url " + e.url + ", e.type " + e.type);
+  console.log("gotResponseHeader: called, " + e.url + ", e.type " + e.type);
   var newResponseHeaders = [];
   var bFoundCacheControl = false;
   //let sNewCacheControlValue = "must-revalidate,max-age=" + gnCacheMaxSecs;
@@ -149,6 +149,9 @@ function gotResponseHeader(e) {
   for (let header of e.responseHeaders) {
     //console.log("gotResponseHeader: check header.name " + header.name + ", header.value " + header.value);
     if (header.name.toLowerCase() === "cache-control") {
+      if (header.value === sNewCacheControlValue) {
+        return;
+      }
       bFoundCacheControl = true;
       console.log("gotResponseHeader:  url " + e.url + ", modify header " + header.name + " from '" + header.value +  "' to '" + sNewCacheControlValue + "'");
       header.value = sNewCacheControlValue;
@@ -158,7 +161,7 @@ function gotResponseHeader(e) {
   }
   if (!bFoundCacheControl) {
     var header = {name:"Cache-Control", value:sNewCacheControlValue};
-    console.log("gotResponseHeader:  push header " + header.name + " value '" + header.value + "'");
+    console.log("gotResponseHeader:  push new header " + header.name + " value '" + header.value + "'");
     newResponseHeaders.push(header);
   }
   //console.log("gotResponseHeader: done, matched, newResponseHeaders " + newResponseHeaders);

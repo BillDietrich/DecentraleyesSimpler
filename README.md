@@ -37,6 +37,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 * By default, this add-on operates on fonts, images, scripts, and stylesheets.
 * Clearing the browser cache clears the **whole** cache, not just items that match this add-on's URL patterns.
 * Cache expiration time is set for items that match, even if their expiration time already is **longer** than the time specified for this add-on.
+* Cache directive is set to **solely** "max-age=NNN" for items that match, even if their existing cache directive contains other qualifiers such as "public" or "private" or "no-cache" etc.
 * A determined CDN could defeat this type of add-on, by generating script or image names that are unique for each user session.
 
 ## Versions
