@@ -33,7 +33,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 
 ## Quirks / Notes
 * To see and change the settings and patterns used by this add-on, you have to export the info to a JSON file, edit that file, and import the changed file back into the add-on.  There is no nice GUI for seeing and changing settings, sorry.
-* Default list of URL patterns is mostly copied from the mappings.js file in the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.  But there's a lot of complexity in that add-on that is not replicated in this add-on.
+* Default list of URL patterns is somewhat copied from the mappings.js file in the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.  But there's a lot of complexity in that add-on that is not replicated in this add-on.
 * By default, this add-on operates on fonts, images, scripts, and stylesheets.
 * Clearing the browser cache clears the **whole** cache, not just items that match this add-on's URL patterns.
 * Cache expiration time is set for items that match, even if their expiration time already is **longer** than the time specified for this add-on.

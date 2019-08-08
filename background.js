@@ -19,28 +19,68 @@ var garrsResourceTypes;
 
 
 
+
+//-------------------------------------------------------------------------------------
+
+let defaultConfig =
+
+{
+  "nCacheMaxSecs": 2592000,
+  "arrsURLPatterns": [
+    "*://ajax.googleapis.com/ajax/libs/*",
+    "*://fonts.googleapis.com/*",
+    "*://*.gstatic.com/*",
+    "*://ajax.aspnetcdn.com/ajax/*",
+    "*://ajax.microsoft.com/ajax/*",
+    "*://cdnjs.cloudflare.com/ajax/libs/*",
+    "*://code.jquery.com/*",
+    "*://cdn.jsdelivr.net/*",
+    "*://api.fastly.com/*",
+    "*://*.kxcdn.com/css/*",
+    "*://*.kxcdn.com/js/*",
+    "*://secure.metacdn.com/api/*",
+    "*://rws.maxcdn.com/*",
+    "*://api.stackpath.com/*",
+    "*://api.leasewebcdn.com/*",
+    "*://*.awsstatic.com/*",
+    "*://*.yastatic.net/*",
+    "*://*.yandex.st/*",
+    "*://apps.bdimg.com/libs/*",
+    "*://libs.baidu.com/*",
+    "*://lib.sinaapp.com/js/*",
+    "*://upcdn.b0.upaiyun.com/libs/*",
+    "*://cdn.bootcss.com/*",
+    "*://sdn.geekzu.org/ajax/ajax/libs/*",
+    "*://ajax.proxy.ustclug.org/*",
+    "*://*.typekit.net/*",
+    "*://*.indexww.com/*",
+    "*://*.billdietrich.me/*"
+  ],
+  "arrsResourceTypes": [
+    "font",
+    "image",
+    "script",
+    "stylesheet"
+  ]
+}
+;
+
+// I really wanted this to live in a JSON file packaged with the add-on,
+// via "web_accessible_resources": ["defaultconfig.json"] in manifest.json,
+// but add-on API does not support even read-only access to such a file.
+// Would have to do headstands to have the user open the file and feed
+// it back into the add-on, after installation, and that's crazy.
+
+
 //-------------------------------------------------------------------------------------
 
 function loadConfigFromStorage() {
   console.log("loadConfigFromStorage: called");
-  config = JSON.parse(localStorage.getItem('config'));	 
+  var config = JSON.parse(localStorage.getItem('config'));	 
   gnCacheMaxSecs = config.nCacheMaxSecs;
   garrsURLPatterns = config.arrsURLPatterns;
   garrsResourceTypes = config.arrsResourceTypes;
   console.log("loadConfigFromStorage: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns + ", garrsResourceTypes " + garrsResourceTypes);
-}
-
-function createDefaultConfig() {
-  console.log("createDefaultConfig: called");
-  gnCacheMaxSecs = 30 * 24 * 60 * 60;  // 30 days
-  garrsURLPatterns = [];
-  garrsURLPatterns.push("*://*.billdietrich.me/*");
-  garrsResourceTypes = [];
-  garrsResourceTypes.push("font");
-  garrsResourceTypes.push("image");
-  garrsResourceTypes.push("script");
-  garrsResourceTypes.push("stylesheet");
-  console.log("createDefaultConfig: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns + ", garrsResourceTypes " + garrsResourceTypes);
 }
 
 function doStartup() {
@@ -49,15 +89,13 @@ function doStartup() {
   // if configuration exists
   if (localStorage.getItem('config')) {
     console.log("Saved config exists; load it");
-    loadConfigFromStorage();	 
+    loadConfigFromStorage();
   }
-  //else no config exists, create a default one
+  //else no config exists, load default one
   else {
-    console.log("No saved config; create default config");
-    createDefaultConfig();
-    // save configuration 
-    config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns, arrsResourceTypes:garrsResourceTypes};
-    localStorage.setItem("config",JSON.stringify(config));
+    console.log("No saved config; load default config");
+    localStorage.setItem("config",JSON.stringify(defaultConfig));
+    loadConfigFromStorage();
   }
 
   // connection to make options page appear
@@ -78,6 +116,14 @@ function receiveConfigChangedMessage(message,sender,sendResponse) {
     console.log("receiveConfigChangedMessage: config changed");
     removeListeners();
     addListeners();
+  } else if (message.type === "resetToDefaultConfig") {
+    console.log("receiveConfigChangedMessage: resetToDefaultConfig");
+    localStorage.setItem("config",JSON.stringify(defaultConfig));
+    loadConfigFromStorage();
+    removeListeners();
+    addListeners();
+  } else {
+    console.log("receiveConfigChangedMessage: unexpected message");
   }
 }
 

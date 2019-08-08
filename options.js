@@ -140,9 +140,7 @@ function giveNotification(sTitle, sMessage){
 function updateInfoMsg(){
   console.log(`updateInfoMsg: called`);
 
-  var sMsg = `The add-on has ${garrsURLPatterns.length} URL patterns defined.`;
-  sMsg += "<br /><br />"
-  sMsg += "Cache max age for matching items is set to ";
+  var sMsg = "Cache max age for matching items is set to ";
   
   let hour = 60 * 60;
   let day = 24 * hour;
@@ -163,7 +161,9 @@ function updateInfoMsg(){
     sMsg += ((gnCacheMaxSecs/year).toFixed(1) + " years.");
  
   sMsg += "<br /><br />"
-  sMsg += "Matching items of the following types are affected: ";
+  sMsg += `${garrsURLPatterns.length} URL patterns defined.`;
+  sMsg += "<br /><br />"
+  sMsg += "Modify matching items of types: ";
   sMsg += garrsResourceTypes;
  
   document.querySelector('#infodiv').innerHTML = sMsg;
@@ -196,6 +196,7 @@ function loadOptionsPage(evt){
     console.log(`loadOptionsPage: browserSettings.cacheEnabled: Control: ${got.levelOfControl}`);
   });
 
+/*
   var gettingSelf = browser.management.getSelf();
   gettingSelf.then((got) => {
     console.log(`loadOptionsPage: management.getSelf: id: ${got.id}`);
@@ -208,6 +209,8 @@ function loadOptionsPage(evt){
 
   let sPath = browser.runtime.getURL("defaultconfig.json");
   console.log(`loadOptionsPage: sPath ${sPath}`);
+  document.getElementById("filelink").href = sPath;
+*/
 
   loadConfig();
   updateInfoMsg();
@@ -231,6 +234,42 @@ function doExport(evt){
   console.log(`doExport: return`);
 }
 
+function doReset(evt){
+  console.log(``);
+  console.log(`doReset: evt ${evt}`);
+
+/*
+  let sPath = browser.runtime.getURL("defaultconfig.json");
+  console.log(`doReset: sPath ${sPath}`);
+
+  const request = new Request(sPath);
+
+  fetch(request)
+  .then(response => {
+    console.log(`doReset: response ${response}`);
+    gFile = response.blob();
+    console.log(`doReset: gFile ${gFile}`);
+    readFromFile();
+  });
+
+  //gFile = new Document(sPath);
+
+  //gFile = new File.createObjectURL();
+  //gFile.name = "defaultconfig.json"
+  //gFile.webkitRelativePath = sPath;
+*/
+
+  // send message to background file
+  browser.runtime.sendMessage({type:'resetToDefaultConfig'});
+
+  giveNotification("Reset settings done", "");
+
+  // don't submit the form
+  evt.preventDefault();
+
+  console.log(`doReset: return`);
+}
+
 function doImport(evt){
   console.log(``);
   console.log(`doImport: evt ${evt}`);
@@ -245,21 +284,10 @@ function doImport(evt){
 
 
 window.addEventListener('load', loadOptionsPage);
+document.querySelector("#exportform").addEventListener("submit", doExport);
+document.querySelector("#resetform").addEventListener("submit", doReset);
 document.querySelector('#importfile').addEventListener('change', handleFileSelect);
 document.querySelector("#importform").addEventListener("submit", doImport);
-document.querySelector("#exportform").addEventListener("submit", doExport);
+
 
 //-------------------------------------------------------------------------------------
-
-/*
-
-
-			const extId = browser.extId = process.argv[5];
-			if (process.env.MOZ_CRASHREPORTER_EVENTS_DIRECTORY) {
-				browser.profileDir = Path.resolve(process.env.MOZ_CRASHREPORTER_EVENTS_DIRECTORY, '../..');
-			} else {
-				throw new Error(`MOZ_CRASHREPORTER_EVENTS_DIRECTORY environment variable not set by Firefox`);
-				// either -P / -p "profile_name" or -profile "profile_path" (precedence?) default: FS.readFileSync('%AppData%\Mozilla\Firefox\profiles.ini').trim().split(/(?:\r\n?\n){2}/g).find(_=>_.includes('Default=1')).match(/Path=(.*))[1]
-			}
-*/
-
