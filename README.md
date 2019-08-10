@@ -1,8 +1,6 @@
 # Decentraleyes simpler
 
-WARNING: DON'T USE YET !!!  STARTED TESTING IT, THE CDN PATTERNS ARE UNTESTED.
-
-![Do not use](http://4.bp.blogspot.com/-1lTbJMSPZaE/Tyu0eri0bOI/AAAAAAAAEP0/L6yk8jqGUwI/s1600/abnormal%2Bbrain.jpg "Do not use")
+WARNING: Still testing this.  It seems to work, but ...
 
 Firefox extension that eliminates most fetching from common CDNs, by greatly increasing the time CDN objects will remain in the browser cache.  This stops a way that CDNs could track user activities.
 
@@ -43,8 +41,8 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 
 ## Versions
 
-### 1.0
-* Get the basics going.
+### 1.0 - 1.2
+* Get the basics going, test.
 
 ## To-do
 * Remove add-on's icon in toolbar; make UI accessible only from add-on's Preferences button in browser's Add-ons page.  Import/export is so rare that this add-on shouldn't take up toolbar space with an icon.  But there seems to be no way to remove the icon there.
