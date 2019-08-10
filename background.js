@@ -54,7 +54,7 @@ let defaultConfig =
     "*://ajax.proxy.ustclug.org/*",
     "*://*.typekit.net/*",
     "*://*.indexww.com/*",
-    "*://*.billdietrich.me/*"
+    "*://*.oath.net/*"
   ],
   "arrsResourceTypes": [
     "font",

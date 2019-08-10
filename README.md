@@ -33,12 +33,13 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 
 ## Quirks / Notes
 * To see and change the settings and patterns used by this add-on, you have to export the info to a JSON file, edit that file, and import the changed file back into the add-on.  There is no nice GUI for seeing and changing settings, sorry.
-* Default list of URL patterns is somewhat copied from the mappings.js file in the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.  But there's a lot of complexity in that add-on that is not replicated in this add-on.
+* Default list of URL patterns is mostly copied from the mappings.js file in the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.  But there's a lot of complexity in that add-on that is not replicated in this add-on.  And I made a few additions.
 * By default, this add-on operates on fonts, images, scripts, and stylesheets.
 * Clearing the browser cache clears the **whole** cache, not just items that match this add-on's URL patterns.
 * Cache expiration time is set for items that match, even if their expiration time already is **longer** than the time specified for this add-on.
 * Cache directive is set to **solely** "max-age=NNN" for items that match, even if their existing cache directive contains other qualifiers such as "public" or "private" or "no-cache" etc.
 * A determined CDN could defeat this type of add-on, by generating script or image names that are unique for each user session.
+* If you use "about:cache" and look in the "disk cache", you will see strange stuff from some sites.  For example, fairly transient images put in with 10-year expiration times.  I wonder if cache performance would be improved if something trimmed those times down.
 
 ## Versions
 
