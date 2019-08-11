@@ -2,7 +2,7 @@
 {
   "name": "decentraleyessimpler",
   "title": "Decentraleyes simpler",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Eliminates most calls to common CDNs, by greatly increasing the time objects from the CDNs will remain in the browser cache.",
     "author": {
 	    "name": "Bill Dietrich"
