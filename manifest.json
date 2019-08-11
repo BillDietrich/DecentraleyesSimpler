@@ -17,11 +17,11 @@
       "browser_style": true
   },
   "permissions": ["browserSettings", "browsingData", "downloads", "notifications", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
-  "version": "1.4",
+  "version": "1.5",
   "applications": {
       "gecko": {
           "id": "decentraleyessimpler@billdietrich.me",
-          "strict_min_version": "45.0"
+          "strict_min_version": "48.0"
       }
   }
 }
