@@ -1,8 +1,6 @@
 # Decentraleyes simpler
 
-WARNING: Still testing this.  It seems to work, but ...
-
-Firefox extension that eliminates most fetching from common CDNs, by greatly increasing the time CDN objects will remain in the browser cache.  This stops a way that CDNs could track user activities.
+Firefox extension that eliminates most fetching from some common CDNs, by greatly increasing the time CDN objects will remain in the browser cache.  This stops a way that CDNs could track user activities.
 
 Inspired by the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.
 
@@ -37,11 +35,12 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 * Cache expiration time is set for items that match, even if their expiration time already is **longer** than the time specified for this add-on.
 * Cache directive is set to **solely** "max-age=NNN" for items that match, even if their existing cache directive contains other qualifiers such as "public" or "private" or "no-cache" etc.
 * A determined CDN could defeat this type of add-on, by generating script or image names that are unique for each user session.
+* I think most big installations use their own copy of the CDN's static content; for example maybe Exxon.com would have a copy of Google's APIs under Exxon.com instead of referencing gstatic.com all the time.  In which case this add-on isn't useful.
 * If you use "about:cache" and look in the "disk cache", you will see strange stuff from some sites.  For example, fairly transient images put in with 10-year expiration times.  I wonder if cache performance would be improved if something trimmed those times down.
 
 ## Versions
 
-### 1.0 - 1.2
+### 1.0 - 1.3
 * Get the basics going, test.
 
 ## To-do
