@@ -132,17 +132,17 @@ function receiveConfigChangedMessage(message,sender,sendResponse) {
 //-------------------------------------------------------------------------------------
 
 function gotRequestHeader(e) {
-  console.log("gotRequestHeader: called, " + e.url + ", e.type " + e.type);
-  for (let header of e.requestHeaders) {
+  //console.log("gotRequestHeader: called, " + e.url + ", e.type " + e.type);
+  //for (let header of e.requestHeaders) {
     //console.log("gotRequestHeader: header.name " + header.name + ", header.value " + header.value);
-  }
+  //}
 }
 
 
 //-------------------------------------------------------------------------------------
 
 function gotResponseHeader(e) {
-  console.log("gotResponseHeader: called, " + e.url + ", e.type " + e.type);
+  //console.log("gotResponseHeader: called, " + e.url + ", e.type " + e.type);
   var newResponseHeaders = [];
   var bFoundCacheControl = false;
   //let sNewCacheControlValue = "must-revalidate,max-age=" + gnCacheMaxSecs;

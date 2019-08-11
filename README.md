@@ -40,7 +40,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 
 ## Versions
 
-### 1.0 - 1.3
+### 1.0 - 1.4
 * Get the basics going, test.
 
 ## To-do

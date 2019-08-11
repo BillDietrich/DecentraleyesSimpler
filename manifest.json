@@ -17,7 +17,7 @@
       "browser_style": true
   },
   "permissions": ["browserSettings", "browsingData", "downloads", "notifications", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
-  "version": "1.3",
+  "version": "1.4",
   "applications": {
       "gecko": {
           "id": "decentraleyessimpler@billdietrich.me",
