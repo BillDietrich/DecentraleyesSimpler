@@ -88,6 +88,8 @@ function readFromFile() {
       garrsURLPatterns = config.arrsURLPatterns;
       garrsResourceTypes = config.arrsResourceTypes;
 
+      localStorage.setItem("config",JSON.stringify(config));
+
       updateInfoMsg();
       giveNotification("Import finished", `Imported ${garrsURLPatterns.length} URL patterns`);
 

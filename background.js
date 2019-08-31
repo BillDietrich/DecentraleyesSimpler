@@ -55,7 +55,10 @@ let defaultConfig =
     "*://*.typekit.net/*",
     "*://*.indexww.com/*",
     "*://*.oath.com/*",
-    "*://*.akamaized.net/*"
+    "*://*.akamaized.net/*",
+    "*://cdn.ampproject.org/*",
+    "*://cdn.datatables.net/*"
+
   ],
   "arrsResourceTypes": [
     "font",

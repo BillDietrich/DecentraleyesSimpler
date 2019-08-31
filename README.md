@@ -41,12 +41,20 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 ## Versions
 
 ### 1.0 - 1.6
-* Get the basics going, test, publish.
+* Get the basics going, test, publish
+
+### 1.7
+* Fixed bug in import where new config didn't get saved to storage.
+* Added cdn.ampproject.org and cdn.datatables.net to default config.
 
 ## To-do
 * Remove add-on's icon in toolbar; make UI accessible only from add-on's Preferences button in browser's Add-ons page.  Import/export is so rare that this add-on shouldn't take up toolbar space with an icon.  But there seems to be no way to remove the icon there.
 
 ## Development
+* Debug extension via
+`/usr/local/lib/nodejs/node-v10.15.3-linux-x64/bin/web-ext run`
+or similar, then type `about:debugging` in the browser address bar,
+click on "Debug" button then "console" tab.  Then click on add-on's icon in toolbar to open prefs page.
 * Use Firefox about:cache to see what is in the cache.
 * Add and delete a file from web site to verify that it is being accessed from cache when it is not present on the web site.
 
