@@ -2,7 +2,7 @@
 {
   "name": "decentraleyessimpler",
   "title": "Decentraleyes simpler",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Eliminates most calls to common CDNs, by greatly increasing the time objects from the CDNs will remain in the browser cache.",
     "author": {
 	    "name": "Bill Dietrich"
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BillDietrich/DecentraleyesSimpler.git"
+    "url": "https://github.com/BillDietrich/DecentraleyesSimpler.git"
   },
   "scripts": {
     "test": "eslint .",

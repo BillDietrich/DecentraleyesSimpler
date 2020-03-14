@@ -47,14 +47,24 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 * Fixed bug in import where new config didn't get saved to storage.
 * Added cdn.ampproject.org and cdn.datatables.net to default config.
 
+### 1.8
+* Updated node to 13.11.0, npm to 6.14.2, web-ext to 4.1.0.
+* Now testing with Firefox 74.0.
+* Used code fragment from https://github.com/Crystal-RainSlide to format exported JSON file with tabs instead of spaces.
+
+
 ## To-do
+* Need to disable Import button until a source file is picked ?
+* Improve options.html with code from https://github.com/Crystal-RainSlide
+* Add an exclude mechanism for the URL patterns ?
 * Remove add-on's icon in toolbar; make UI accessible only from add-on's Preferences button in browser's Add-ons page.  Import/export is so rare that this add-on shouldn't take up toolbar space with an icon.  But there seems to be no way to remove the icon there.
 
 ## Development
 * Debug extension via
-`/usr/local/lib/nodejs/node-v10.15.3-linux-x64/bin/web-ext run`
-or similar, then type `about:debugging` in the browser address bar,
-click on "Debug" button then "console" tab.  Then click on add-on's icon in toolbar to open prefs page.
+`web-ext run`
+or similar, which will launch Firefox.  Go to "about:debugging".
+Click on "This Firefox" link.  Click on "Inspect" button.
+Click on "console" tab.  Then click on add-on's icon in toolbar to open prefs page.
 * Use Firefox about:cache to see what is in the cache.
 * Add and delete a file from web site to verify that it is being accessed from cache when it is not present on the web site.
 

@@ -50,7 +50,7 @@ function saveToFile() {
   console.log(`saveToFile: gnCacheMaxSecs == ${gnCacheMaxSecs}, garrsURLPatterns == ${garrsURLPatterns}, garrsResourceTypes == ${garrsResourceTypes}`);
 
   config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns, arrsResourceTypes:garrsResourceTypes};
-  var objectToSave = new Blob(new String(JSON.stringify(config, null, 2)));
+  var objectToSave = new Blob(new String(JSON.stringify(config, null, 1).replace(/^ +/mg, spaces => spaces.replace(/ /g, "\t"))));
 
   gObjectURL = URL.createObjectURL(objectToSave);
   
