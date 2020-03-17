@@ -1,63 +1,81 @@
 <!DOCTYPE html>
 
 <html lang="en-US">
-  <head>
-    <meta charset="utf-8">
-  </head>
+
+<head>
+<meta charset="utf-8">
+<title>Settings - Decentraleyes Simpler</title>
+
+<style>
+body {
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+@media (min-width: 80ch) {
+  body {
+    max-width: 80ch;
+  }
+}
+
+.box {
+  border: 2px solid black;
+  padding: 1rem;
+}
+.box ~ .box {
+  margin-block-start: 1rem;
+}
+.box:empty {
+  display: none;
+}
+
+h1 {
+  text-align: center;
+}
+
+.box > h3:first-child {
+  margin-block-start: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: white;
+    background-color: black;
+  }
+  .box {
+    border-color: white;
+  }
+}
+</style>
+</head>
 
 <body>
 
-&nbsp;
-<br /><br />
+<div id="infodiv" class="box" role="region"></div>
 
-<div id="infodiv" style="border: 2px solid black; margin: 2px; padding: 5px">
-&nbsp;
-<br /><br />
-&nbsp;
-</div>
+<h2>Import and export</h2>
 
-&nbsp;
-<br />
-&nbsp;
-<br />
-
-<div style="border: 2px solid black; margin: 2px; padding: 5px">
-<font size="+1"><b>Export settings to file:</b></font>
-<br /><br />
-<form id="exportform">
+<div class="box" role="region">
+  <h3>Export settings to file:</h3>
+  <form id="exportform">
     <button type="submit" >Save As ...</button>
-</form>
+  </form>
 </div>
 
-&nbsp;
-<br />
-&nbsp;
-<br />
-
-<div style="border: 2px solid black; margin: 2px; padding: 5px">
-<font size="+1"><b>Reset settings to default:</b></font>
-<form id="resetform">
+<div class="box" role="region">
+  <h3>Reset settings to default:</h3>
+  <form id="resetform">
     <button type="submit" >Reset settings</button>
-</form>
+  </form>
 </div>
 
-&nbsp;
-<br />
-&nbsp;
-<br />
-
-
-<div style="border: 2px solid black; margin: 2px; padding: 5px">
-<font size="+1"><b>Import settings from file:</b></font>
-<br /><br />
-WARNING: Importing settings deletes any existing settings and clears the cache.
-<br /><br />
-<form id="importform">
-    <input type="file" id="importfile" accept=".json" >
-    <br />
-    <br />
-    <button type="submit" >Import settings</button>
-</form>
+<div class="box" role="region">
+  <h3>Import settings from file:</h3>
+  <p>WARNING: Importing settings deletes any existing settings and clears the cache.</p>
+  <form id="importform">
+    <input type="file" id="importfilename" aria-label="Import settings" accept=".json" />
+    <button type="submit" id="importfilebutton" disabled >Import settings</button>
+  </form>
 </div>
 
 <script src="options.js"></script>

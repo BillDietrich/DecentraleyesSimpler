@@ -181,6 +181,8 @@ function handleFileSelect(evt){
 
   gFile = evt.target.files[0];
 
+  document.querySelector('#importfilebutton').disabled = false;
+
   console.log(`handleFileSelect: return`);
 }
 
@@ -288,7 +290,7 @@ function doImport(evt){
 window.addEventListener('load', loadOptionsPage);
 document.querySelector("#exportform").addEventListener("submit", doExport);
 document.querySelector("#resetform").addEventListener("submit", doReset);
-document.querySelector('#importfile').addEventListener('change', handleFileSelect);
+document.querySelector('#importfilename').addEventListener('change', handleFileSelect);
 document.querySelector("#importform").addEventListener("submit", doImport);
 
 

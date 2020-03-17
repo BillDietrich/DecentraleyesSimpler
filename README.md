@@ -52,10 +52,12 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 * Now testing with Firefox 74.0.
 * Used code fragment from https://github.com/Crystal-RainSlide to format exported JSON file with tabs instead of spaces.
 
+### 1.9
+* Added CSS from https://github.com/Crystal-RainSlide but didn't really see any change.
+* Disabled Import button until a source file is picked.
+
 
 ## To-do
-* Need to disable Import button until a source file is picked ?
-* Improve options.html with code from https://github.com/Crystal-RainSlide
 * Add an exclude mechanism for the URL patterns ?
 * Remove add-on's icon in toolbar; make UI accessible only from add-on's Preferences button in browser's Add-ons page.  Import/export is so rare that this add-on shouldn't take up toolbar space with an icon.  But there seems to be no way to remove the icon there.
 
