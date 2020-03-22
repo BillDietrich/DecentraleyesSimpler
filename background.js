@@ -12,7 +12,9 @@ function handleClick() {
 
 var gnCacheMaxSecs;
 
-var garrsURLPatterns;
+var garrsURLPatterns;         // MDN's filter format, e.g. "*://code.jquery.com/*"
+
+var garrsExcludeURLPrefixes;  // "start of URL" format, e.g. "https://code.jquery.com/"
 
 // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/ResourceType
 var garrsResourceTypes;
@@ -58,7 +60,8 @@ let defaultConfig =
     "*://*.akamaized.net/*",
     "*://cdn.ampproject.org/*",
     "*://cdn.datatables.net/*"
-
+  ],
+  "arrsExcludeURLPrefixes": [
   ],
   "arrsResourceTypes": [
     "font",
@@ -83,8 +86,9 @@ function loadConfigFromStorage() {
   var config = JSON.parse(localStorage.getItem('config'));	 
   gnCacheMaxSecs = config.nCacheMaxSecs;
   garrsURLPatterns = config.arrsURLPatterns;
+  garrsExcludeURLPrefixes = config.arrsExcludeURLPrefixes;
   garrsResourceTypes = config.arrsResourceTypes;
-  console.log("loadConfigFromStorage: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns + ", garrsResourceTypes " + garrsResourceTypes);
+  console.log("loadConfigFromStorage: return, gnCacheMaxSecs " + gnCacheMaxSecs + ", garrsURLPatterns " + garrsURLPatterns + ", garrsExcludeURLPrefixes " + garrsExcludeURLPrefixes + ", garrsResourceTypes " + garrsResourceTypes);
 }
 
 function doStartup() {
@@ -118,6 +122,9 @@ function receiveConfigChangedMessage(message,sender,sendResponse) {
   console.log("receiveConfigChangedMessage: called");
   if (message.type === "configChanged") {
     console.log("receiveConfigChangedMessage: config changed");
+    loadConfigFromStorage();
+    config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns, arrsExcludeURLPrefixes:garrsExcludeURLPrefixes, arrsResourceTypes:garrsResourceTypes};
+    console.log(`receiveConfigChangedMessage: new config is ${JSON.stringify(config)}`);
     removeListeners();
     addListeners();
   } else if (message.type === "resetToDefaultConfig") {
@@ -146,6 +153,17 @@ function gotRequestHeader(e) {
 
 function gotResponseHeader(e) {
   //console.log("gotResponseHeader: called, " + e.url + ", e.type " + e.type);
+
+  // implement URL exclusions
+  //console.log("gotResponseHeader: garrsExcludeURLPrefixes.length " + garrsExcludeURLPrefixes.length);
+  for (let sURLPrefix of garrsExcludeURLPrefixes) {
+    //console.log("gotResponseHeader: check exclusion " + sURLPrefix);
+    if (e.url.startsWith(sURLPrefix)) {
+      //console.log(`gotResponseHeader: url matches exclusion ${sURLPrefix}`);
+      return;
+    }
+  }
+
   var newResponseHeaders = [];
   var bFoundCacheControl = false;
   //let sNewCacheControlValue = "must-revalidate,max-age=" + gnCacheMaxSecs;
@@ -157,7 +175,7 @@ function gotResponseHeader(e) {
         return;
       }
       bFoundCacheControl = true;
-      console.log("gotResponseHeader:  url " + e.url + ", modify header " + header.name + " from '" + header.value +  "' to '" + sNewCacheControlValue + "'");
+      //console.log("gotResponseHeader:  url " + e.url + ", modify header " + header.name + " from '" + header.value +  "' to '" + sNewCacheControlValue + "'");
       header.value = sNewCacheControlValue;
     }
     //console.log("gotResponseHeader:  push header " + header.name + " value '" + header.value + "'");
@@ -165,7 +183,7 @@ function gotResponseHeader(e) {
   }
   if (!bFoundCacheControl) {
     var header = {name:"Cache-Control", value:sNewCacheControlValue};
-    console.log("gotResponseHeader:  push new header " + header.name + " value '" + header.value + "'");
+    //console.log("gotResponseHeader:  push new header " + header.name + " value '" + header.value + "'");
     newResponseHeaders.push(header);
   }
   //console.log("gotResponseHeader: done, matched, newResponseHeaders " + newResponseHeaders);
@@ -187,16 +205,20 @@ function addListeners() {
   // If you load an address such as domain.com/page.html which then loads test.js, the request
   // and response for test.js will have type script".
 
+  if (false) {
   browser.webRequest.onBeforeSendHeaders.addListener(
                                           gotRequestHeader,
+                                          // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/RequestFilter
                                           //{urls: "<all_urls>"},    // filter
                                           //{urls: garrsURLPatterns},  // filter
                                           {urls: garrsURLPatterns, types: garrsResourceTypes},  // filter
                                           ["blocking", "requestHeaders"]  // extraInfoSpec
                                           );
+  }
 
   browser.webRequest.onHeadersReceived.addListener(
                                           gotResponseHeader,
+                                          // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/RequestFilter
                                           //{urls: "<all_urls>"},    // filter
                                           //{urls: garrsURLPatterns},  // filter
                                           {urls: garrsURLPatterns, types: garrsResourceTypes},  // filter
@@ -206,7 +228,7 @@ function addListeners() {
 
 function removeListeners() {
   console.log("removeListeners: called");
-  browser.webRequest.onBeforeSendHeaders.removeListener(gotRequestHeader);
+  //browser.webRequest.onBeforeSendHeaders.removeListener(gotRequestHeader);
   browser.webRequest.onHeadersReceived.removeListener(gotResponseHeader);
 }
 

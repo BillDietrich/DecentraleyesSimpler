@@ -30,6 +30,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 ## Quirks / Notes
 * To see and change the settings and patterns used by this add-on, you have to export the info to a JSON file, edit that file, and import the changed file back into the add-on.  There is no nice GUI for seeing and changing settings, sorry.
 * Default list of URL patterns is mostly copied from the mappings.js file in the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.  But there's a lot of complexity in that add-on that is not replicated in this add-on.  And I made a few additions.
+* You can specify excluded-URL prefixes.  This means an URL matched by one of the patterns can be excluded (cache expiration time not altered) by a matching prefix.
 * By default, this add-on operates on fonts, images, scripts, and stylesheets.
 * Clearing the browser cache clears the **whole** cache, not just items that match this add-on's URL patterns.
 * Cache expiration time is set for items that match, even if their expiration time already is **longer** than the time specified for this add-on.
@@ -56,9 +57,13 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 * Added CSS from https://github.com/Crystal-RainSlide but didn't really see any change.
 * Disabled Import button until a source file is picked.
 
+### 2.0
+* Added exclude-URL prefixes.
+* I think I fixed a bug where import worked but the new settings were not used until next time the extension was loaded.
+* Removed request listener, since it wasn't doing anything, only need to process responses.
+
 
 ## To-do
-* Add an exclude mechanism for the URL patterns ?
 * Remove add-on's icon in toolbar; make UI accessible only from add-on's Preferences button in browser's Add-ons page.  Import/export is so rare that this add-on shouldn't take up toolbar space with an icon.  But there seems to be no way to remove the icon there.
 
 ## Development

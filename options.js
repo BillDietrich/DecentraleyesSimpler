@@ -4,7 +4,9 @@
 
 var gnCacheMaxSecs;
 
-var garrsURLPatterns;
+var garrsURLPatterns;         // MDN's filter format, e.g. "*://code.jquery.com/*"
+
+var garrsExcludeURLPrefixes;  // "start of URL" format, e.g. "https://code.jquery.com/"
 
 var garrsResourceTypes;
 
@@ -38,8 +40,8 @@ function onChangedDownload(downloadDelta) {
     gObjectURL = null;
     gnDownloadID = 0;
     browser.downloads.onChanged.removeListener(onChangedDownload);
-    console.log(`onChangedDownload: export finished; exported ${garrsURLPatterns.length} URL patterns`);
-    giveNotification("Export finished", `Exported ${garrsURLPatterns.length} URL patterns`);
+    console.log(`onChangedDownload: export finished; exported ${garrsURLPatterns.length} URL patterns and ${garrsExcludeURLPrefixes.length} exclusions`);
+    giveNotification("Export finished", `Exported ${garrsURLPatterns.length} URL patterns and ${garrsExcludeURLPrefixes.length} exclusions`);
   }
 }
 
@@ -47,9 +49,9 @@ function saveToFile() {
   console.log(`saveToFile: called`);
       
   loadConfig();
-  console.log(`saveToFile: gnCacheMaxSecs == ${gnCacheMaxSecs}, garrsURLPatterns == ${garrsURLPatterns}, garrsResourceTypes == ${garrsResourceTypes}`);
+  console.log(`saveToFile: gnCacheMaxSecs == ${gnCacheMaxSecs}, garrsURLPatterns == ${garrsURLPatterns}, garrsExcludeURLPrefixes == ${garrsExcludeURLPrefixes}, garrsResourceTypes == ${garrsResourceTypes}`);
 
-  config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns, arrsResourceTypes:garrsResourceTypes};
+  config = {nCacheMaxSecs:gnCacheMaxSecs, arrsURLPatterns:garrsURLPatterns, arrsExcludeURLPrefixes:garrsExcludeURLPrefixes, arrsResourceTypes:garrsResourceTypes};
   var objectToSave = new Blob(new String(JSON.stringify(config, null, 1).replace(/^ +/mg, spaces => spaces.replace(/ /g, "\t"))));
 
   gObjectURL = URL.createObjectURL(objectToSave);
@@ -84,16 +86,18 @@ function readFromFile() {
       console.log(`readFromFile: readAsText result ${evt.target.result}`);
  
       let config = JSON.parse(evt.target.result);
+      console.log(`readFromFile: new config is ${JSON.stringify(config)}`);
       gnCacheMaxSecs = config.nCacheMaxSecs;
       garrsURLPatterns = config.arrsURLPatterns;
+      garrsExcludeURLPrefixes = config.arrsExcludeURLPrefixes;
       garrsResourceTypes = config.arrsResourceTypes;
 
       localStorage.setItem("config",JSON.stringify(config));
 
       updateInfoMsg();
-      giveNotification("Import finished", `Imported ${garrsURLPatterns.length} URL patterns`);
+      giveNotification("Import finished", `Imported ${garrsURLPatterns.length} URL patterns and ${garrsExcludeURLPrefixes.length} exclusions`);
 
-      console.log(`readFromFile: done; imported ${garrsURLPatterns.length} URL patterns`);
+      console.log(`readFromFile: done; imported ${garrsURLPatterns.length} URL patterns and ${garrsExcludeURLPrefixes.length} exclusions`);
 
       // clear the browser cache
       var removeCachePromise = browser.browsingData.removeCache({});
@@ -165,6 +169,8 @@ function updateInfoMsg(){
   sMsg += "<br /><br />"
   sMsg += `${garrsURLPatterns.length} URL patterns defined.`;
   sMsg += "<br /><br />"
+  sMsg += `${garrsExcludeURLPrefixes.length} exclusions defined.`;
+  sMsg += "<br /><br />"
   sMsg += "Modify matching items of types: ";
   sMsg += garrsResourceTypes;
  
@@ -190,6 +196,7 @@ function loadConfig(){
   let config = JSON.parse(localStorage.getItem('config'));
   gnCacheMaxSecs = config.nCacheMaxSecs;
   garrsURLPatterns = config.arrsURLPatterns;
+  garrsExcludeURLPrefixes = config.arrsExcludeURLPrefixes;
   garrsResourceTypes = config.arrsResourceTypes;
 }
 
