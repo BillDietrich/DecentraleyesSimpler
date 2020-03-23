@@ -31,6 +31,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 * To see and change the settings and patterns used by this add-on, you have to export the info to a JSON file, edit that file, and import the changed file back into the add-on.  There is no nice GUI for seeing and changing settings, sorry.
 * Default list of URL patterns is mostly copied from the mappings.js file in the [Decentraleyes add-on](https://addons.mozilla.org/en-US/firefox/addon/decentraleyes/ "Decentraleyes add-on") by Thomas Rientjes.  But there's a lot of complexity in that add-on that is not replicated in this add-on.  And I made a few additions.
 * You can specify excluded-URL prefixes.  This means an URL matched by one of the patterns can be excluded (cache expiration time not altered) by a matching prefix.
+* Note that match-patterns and excluded-URL prefixes have different syntax.  Patterns look like `*://code.jquery.com/*` and exclusion prefixes look like `https://code.jquery.com/`.
 * By default, this add-on operates on fonts, images, scripts, and stylesheets.
 * Clearing the browser cache clears the **whole** cache, not just items that match this add-on's URL patterns.
 * Cache expiration time is set for items that match, even if their expiration time already is **longer** than the time specified for this add-on.
@@ -67,6 +68,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 * Remove add-on's icon in toolbar; make UI accessible only from add-on's Preferences button in browser's Add-ons page.  Import/export is so rare that this add-on shouldn't take up toolbar space with an icon.  But there seems to be no way to remove the icon there.
 
 ## Development
+* Version number has to be changed in both package.json and manifest.json
 * Debug extension via
 `web-ext run`
 or similar, which will launch Firefox.  Go to "about:debugging".
@@ -74,6 +76,9 @@ Click on "This Firefox" link.  Click on "Inspect" button.
 Click on "console" tab.  Then click on add-on's icon in toolbar to open prefs page.
 * Use Firefox about:cache to see what is in the cache.
 * Add and delete a file from web site to verify that it is being accessed from cache when it is not present on the web site.
+* Commit files to GitHub, then before publishing do (on disk):
+
+    `zip decentraleyessimplerN.N.zip b* icon* L* m* o* p* R*`
 
 ## Privacy Policy
 
