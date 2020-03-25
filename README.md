@@ -60,6 +60,7 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 
 ### 2.0
 * Added exclude-URL prefixes.
+* Sorry, there is no smooth upgrade from past versions to this new version.  If you have customized settings and wish to keep them, in old extension export to JSON file, install new version of extension, edit JSON file to add ```"arrsExcludeURLPrefixes": [],``` before ```"arrsResourceTypes"``` then import the JSON file into the new extension.
 * I think I fixed a bug where import worked but the new settings were not used until next time the extension was loaded.
 * Removed request listener, since it wasn't doing anything, only need to process responses.
 
@@ -69,12 +70,10 @@ So, I think "Decentraleyes simpler" is better than Decentraleyes.  No need to tr
 
 ## Development
 * Version number has to be changed in both package.json and manifest.json
-* Debug extension via
-`web-ext run`
-or similar, which will launch Firefox.  Go to "about:debugging".
+* Debug extension via `web-ext run` or similar, which will launch Firefox.  Go to `about:debugging`.
 Click on "This Firefox" link.  Click on "Inspect" button.
-Click on "console" tab.  Then click on add-on's icon in toolbar to open prefs page.
-* Use Firefox about:cache to see what is in the cache.
+Click on "console" tab.  Then click on add-on's icon in toolbar to open preferences page.
+* Use Firefox `about:cache` to see what is in the cache.
 * Add and delete a file from web site to verify that it is being accessed from cache when it is not present on the web site.
 * Commit files to GitHub, then before publishing do (on disk):
 
